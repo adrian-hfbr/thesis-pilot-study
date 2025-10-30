@@ -60,77 +60,72 @@ def get_s3_client():
 
 def backup_participant_data(session_id, prolific_pid):
     """
-    Backup all CSV data for one participant to S3 immediately after completion.
-    
-    This function:
-    1. Reads each CSV file
-    2. Filters for current participant's data only
-    3. Uploads their data to S3 as separate files
-    4. Fails gracefully - data remains in local CSV if backup fails
-    
-    Args:
-        session_id (str): Participant's unique session ID
-        prolific_pid (str): Prolific participant ID for file naming
-        
-    Returns:
-        bool: True if at least one file backed up successfully, False otherwise
+    Backup all CSV data + error files for one participant to S3 immediately after completion.
     """
     s3_client, bucket_name = get_s3_client()
     if not s3_client:
-        # S3 not configured or failed - data is still safe in local CSV
         return False
-    
+
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     backup_count = 0
-    
-    # All four CSV files to backup
+
+    # All four regular CSV files + error fallback files
     csv_files = [
         'participants.csv',
         'tasks.csv',
         'interactions.csv',
-        'post_survey.csv'
+        'post_survey.csv',
+        'participants_error.csv',     
+        'tasks_error.csv',        
+        'interactions_error.csv',   
+        'post_survey_error.csv',     
+        'system_errors.log'
     ]
-    
+
     for csv_file in csv_files:
         try:
             filepath = os.path.join('logs', csv_file)
             
-            # Check if file exists
             if not os.path.exists(filepath):
-                continue
+                continue  # Skip if doesn't exist
             
-            # Read CSV and filter for this participant
-            df = pd.read_csv(filepath)
-            participant_df = df[df['session_id'] == session_id]
-            
-            # Skip if no data for this participant
-            if len(participant_df) == 0:
-                continue
-            
-            # Create S3 key (path) with organized structure
-            s3_key = f"participants/{session_id}/{timestamp}_{csv_file}"
-            
-            # Convert DataFrame to CSV bytes
-            csv_buffer = BytesIO()
-            participant_df.to_csv(csv_buffer, index=False)
-            csv_buffer.seek(0)
-            
-            # Upload to S3
-            s3_client.upload_fileobj(
-                csv_buffer,
-                bucket_name,
-                s3_key,
-                ExtraArgs={'ContentType': 'text/csv'}
-            )
+            # For error files and system_errors.log, backup the entire file
+            if csv_file.endswith('_error.csv') or csv_file == 'system_errors.log':
+                s3_key = f"participants/{session_id}/{timestamp}_{csv_file}"
+                s3_client.upload_file(
+                    filepath,
+                    bucket_name,
+                    s3_key,
+                    ExtraArgs={'ContentType': 'text/plain' if csv_file.endswith('.log') else 'text/csv'}
+                )
+            else:
+                # For regular CSVs, filter for this participant only
+                df = pd.read_csv(filepath)
+                participant_df = df[df['session_id'] == session_id]
+                
+                if len(participant_df) == 0:
+                    continue
+                
+                s3_key = f"participants/{session_id}/{timestamp}_{csv_file}"
+                csv_buffer = BytesIO()
+                participant_df.to_csv(csv_buffer, index=False)
+                csv_buffer.seek(0)
+                
+                s3_client.upload_fileobj(
+                    csv_buffer,
+                    bucket_name,
+                    s3_key,
+                    ExtraArgs={'ContentType': 'text/csv'}
+                )
             
             backup_count += 1
             
         except Exception as e:
-            # Log error but continue with other files
             print(f"Warning: Backup failed for {csv_file}: {e}")
             continue
-    
+
     return backup_count > 0
+
 
 def backup_all_csvs():
     """

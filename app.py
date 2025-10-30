@@ -85,7 +85,7 @@ def initialize_session_state():
     if 'current_step' not in st.session_state:
         st.session_state.current_step = 'consent'
         st.session_state.task_number = 1
-        st.session_state.group = "Augmented" #random.choice(['Augmented', 'Minimal']) #  #
+        st.session_state.group = random.choice(['Augmented', 'Minimal'])
         
     if 'experiment_start_time' not in st.session_state:
         st.session_state.experiment_start_time = datetime.now()
@@ -663,8 +663,7 @@ def render_debriefing():
     st.info("**Wichtig:** Klicken Sie auf den Button unten, um Ihre Teilnahme auf Prolific zu bestätigen und Ihre Vergütung zu erhalten.")
     
     # Get Prolific completion URL
-    # Replace 'YOUR_COMPLETION_CODE' with your actual Prolific completion code
-    PROLIFIC_COMPLETION_CODE = "C1234ABC"  # Get this from your Prolific study settings
+    PROLIFIC_COMPLETION_CODE = "XYZXYZXYZ"
     completion_url = f"https://app.prolific.com/submissions/complete?cc={PROLIFIC_COMPLETION_CODE}"
     
     # Create a clickable button-style link
@@ -685,7 +684,7 @@ def render_debriefing():
                 border-radius: 8px;
                 font-weight: bold;
             ">
-                ✓ Zurück zu Prolific (Teilnahme bestätigen)
+                Zurück zu Prolific
             </button>
         </a>
         """,
