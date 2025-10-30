@@ -1,6 +1,6 @@
 streamlit>=1.31
 langchain
-langchain-openai
+langchain-openai==0.0.7
 python-dotenv
 pypdf
 faiss-cpu
@@ -8,7 +8,7 @@ pandas
 nest-asyncio
 
 sentence-transformers>=2.2.0
-langchain-community>=0.2.0
+langchain-community==0.0.20
 torch>=2.0.0
 tenacity>=8.0.0
 
