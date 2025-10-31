@@ -344,16 +344,16 @@ def render_survey(surveydict, next_step):
             responses[key] = likert_select(question, key, default=4)
 
     # Render EFFORT items
-    if "effort_items" in surveydict:
-        st.subheader("Anstrengung bei der Aufgabenbearbeitung")
-        for key, question in surveydict["effort_items"].items():
-            responses[key] = likert_select(question, key, default=4)
+    #if "effort_items" in surveydict:
+    #    st.subheader("Anstrengung bei der Aufgabenbearbeitung")
+    #    for key, question in surveydict["effort_items"].items():
+    #        responses[key] = likert_select(question, key, default=4)
 
     # Render RELIANCE items
-    if "reliance_items" in surveydict:
-        st.subheader("Bereitschaft zu akzeptieren")
-        for key, question in surveydict["reliance_items"].items():
-            responses[key] = likert_select(question, key, default=4)
+    #if "reliance_items" in surveydict:
+    #    st.subheader("Bereitschaft zu akzeptieren")
+    #    for key, question in surveydict["reliance_items"].items():
+    #        responses[key] = likert_select(question, key, default=4)
     
     # Trust (functionality, helpfulness, reliability)
     if "trust_items" in surveydict:
