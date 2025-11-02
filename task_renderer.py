@@ -222,9 +222,7 @@ def render_message_list(messages, task_number, show_source_modal_callback):
 def _validate_user_input(user_query):
     """
     Validates and sanitizes user input before RAG processing.
-    
-    NEW FUNCTION - Added for input validation (Fix #2: Chat Input Validation)
-    
+        
     Args:
         user_query: Raw user input string
         
@@ -234,17 +232,9 @@ def _validate_user_input(user_query):
     # Sanitize: strip whitespace
     sanitized = user_query.strip()
     
-    # Check 1: Empty input
-    if len(sanitized) == 0:
-        return False, "", "Bitte geben Sie eine Frage ein."
-    
-    # Check 2: Minimum length
-    if len(sanitized) < 3:
-        return False, "", "Ihre Frage ist zu kurz. Bitte geben Sie mindestens 3 Zeichen ein."
-    
-    # Check 3: Maximum length
-    if len(sanitized) > 500:
-        return False, "", "Ihre Frage ist zu lang. Bitte kürzen Sie sie auf maximal 500 Zeichen."
+    # Check
+    if len(sanitized) == 0 or len(sanitized) < 3 or len(sanitized) > 500:
+        return False, "", "Bitte geben Sie die Frage erneut ein und achten Sie auf die Länge."
     
     # All checks passed
     return True, sanitized, ""

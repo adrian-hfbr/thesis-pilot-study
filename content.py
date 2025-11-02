@@ -183,7 +183,7 @@ TASKS = {
     },
     3: {
         "name": "Sparer-Pauschbetrag mehrere Banken",
-        "scenario": """Sie sind alleinstehend und erzielen Kapitaleinkünfte bei zwei verschiedenen Banken. Um den **Sparer-Pauschbetrag** zu nutzen, haben Sie bei jeder Bank einen Freistellungsaufträge erteilt, der je 600€ beträgt.""",
+        "scenario": """Sie sind alleinstehend und erzielen Kapitaleinkünfte bei zwei verschiedenen Banken. Um den **Sparer-Pauschbetrag** zu nutzen, haben Sie bei jeder Bank einen Freistellungsauftrag erteilt, der je 600€ beträgt.""",
         
         "question": "Ist diese Aufteilung der Freistellungsaufträge zulässig, um den Sparer-Pauschbetrag zu nutzen?",
         
@@ -198,12 +198,12 @@ TASKS = {
     'name': 'Doppelte Haushaltsführung - Unterkunftskosten',
     'scenario': '''Sie sind als Ingenieur in München tätig und führen eine **doppelte Haushaltsführung**, da Ihre Familie noch in Hamburg wohnt.  Ihre Unterkunft in München kostet 1.400€ Miete pro Monat. Da Sie sich die Wohnung mit einem Kollegen teilen, zahlen Sie nur 50 Prozent der Miete. ''',
     
-    'question': '''Kann die Miete für die Unterkunft als Werbungskosten abgesetzt werden?''',
+    'question': '''Kann die volle Miete für die Unterkunft als Werbungskosten bei Ihnen abgesetzt werden?''',
     
     'options': [
         'Ja, die vollen 1.400 Euro pro Monat, da dies die tatsächlichen Kosten der Unterkunft sind.',
         'Nein, maximal 700 Euro pro Monat, da nur der selbst gezahlte Anteil absetzbar ist.',
-        'Nein, maximal 1.000 Euro pro Monat, auch wenn nur 700 Euro selbst gezahlt werden.',
+        'Nein, aber 1.000 Euro pro Monat, auch wenn nur 700 Euro selbst gezahlt werden.',
     ],
     "correct_answer": 1
     }

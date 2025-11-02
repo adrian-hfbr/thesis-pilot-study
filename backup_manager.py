@@ -39,23 +39,23 @@ def get_s3_client():
         return s3_client, bucket_name
         
     except ImportError:
-        st.warning("⚠️ boto3 nicht installiert. Daten sind lokal gespeichert.")
+        st.warning("boto3 nicht installiert. Daten sind lokal gespeichert.")
         return None, None
     except KeyError as e:
-        st.warning(f"⚠️ AWS-Konfiguration fehlt in secrets: {e}. Daten sind lokal gespeichert.")
+        st.warning(f"AWS-Konfiguration fehlt in secrets: {e}. Daten sind lokal gespeichert.")
         return None, None
     except NoCredentialsError:
-        st.warning("⚠️ AWS-Zugangsdaten ungültig. Daten sind lokal gespeichert.")
+        st.warning("AWS-Zugangsdaten ungültig. Daten sind lokal gespeichert.")
         return None, None
     except ClientError as e:
         error_code = e.response['Error']['Code']
         if error_code == '404':
-            st.error(f"⚠️ S3-Bucket nicht gefunden. Daten sind lokal gespeichert.")
+            st.error(f"S3-Bucket nicht gefunden. Daten sind lokal gespeichert.")
         else:
-            st.warning(f"⚠️ S3-Verbindung fehlgeschlagen: {e}. Daten sind lokal gespeichert.")
+            st.warning(f"S3-Verbindung fehlgeschlagen: {e}. Daten sind lokal gespeichert.")
         return None, None
     except Exception as e:
-        st.warning(f"⚠️ Unerwarteter Fehler: {e}. Daten sind lokal gespeichert.")
+        st.warning(f"Unerwarteter Fehler: {e}. Daten sind lokal gespeichert.")
         return None, None
 
 def backup_participant_data(session_id, prolific_pid):
