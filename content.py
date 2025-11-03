@@ -48,7 +48,7 @@ Ein Klick auf diesen Button öffnet ein Fenster mit dem vollständigen Gesetzesp
 
 • Wie und ob Sie die bereitgestellten Funktionen nutzen, ist vollständig Ihnen überlassen.
 
-• Wie bei bekannten KI-Chatbots können Sie beliebig viele Anfragen stellen. Der KI-Steuerassistent kann sich jedoch immer nur an die letzten beiden Anfragen und die eigenen Antworten erinnern.
+• Wie bei bekannten KI-Chatbots können Sie beliebig viele Anfragen stellen. Der KI-Steuerassistent kann sich jedoch immer nur an die letzten beiden Anfragen und die dazugehörigen Antworten erinnern.
 
 
 """,
@@ -107,7 +107,7 @@ Ein separater Button mit der Aufschrift „Gesetzestext anzeigen" öffnet ein Fe
 
 • Wie und ob Sie die bereitgestellten Funktionen nutzen, ist vollständig Ihnen überlassen.
 
-• Wie bei bekannten KI-Chatbots können Sie beliebig viele Anfragen stellen. Der KI-Steuerassistent kann sich jedoch immer nur an die letzten beiden Anfragen und die eigenen Antworten erinnern.
+• Wie bei bekannten KI-Chatbots können Sie beliebig viele Anfragen stellen. Der KI-Steuerassistent kann sich jedoch immer nur an die letzten beiden Anfragen und die dazugehörigen Antworten erinnern.
 """
 }
 
