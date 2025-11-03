@@ -2,7 +2,7 @@
 
 CONSENT_TEXT = """
 **Ablauf:**
-Sie werden gebeten, vier aufgabenbezogene Probleme im Bereich des deutschen Steuerrechts mithilfe eines KI-Chatbots zu lösen. Zuvor und danach werden Sie gebeten, einige Fragebögen auszufüllen. Die gesamte Studie dauert voraussichtlich X-Y Minuten.
+Sie werden gebeten, vier aufgabenbezogene Probleme im Bereich des deutschen Steuerrechts mithilfe eines KI-Chatbots zu lösen. Zuvor und danach werden Sie gebeten, einige Fragebögen auszufüllen. Die gesamte Studie dauert voraussichtlich 20-25 Minuten.
 
 **Datenschutz:**
 Alle Ihre Antworten werden anonymisiert erfasst. Es werden keine persönlichen Daten erhoben, die eine Identifizierung Ihrer Person ermöglichen. Die gesammelten Daten werden ausschließlich für wissenschaftliche Zwecke verwendet.
@@ -37,11 +37,20 @@ Ein Klick auf diesen Button öffnet ein Fenster mit dem vollständigen Gesetzesp
 
 • Bitte verwenden Sie den „Schließen"-Button am unteren Rand des Fensters, wenn Sie den Gesetzestext wieder verlassen möchten.
 
+• Bitte versuchen Sie nicht in der App zurückzugehen (z. B. über die Pfeiltasten des Browsers).
+
 • Bitte klicken Sie nicht auf den Button, wenn gerade die Antwort durch den KI-Assistenten generiert wird.
+
+
+**Hinweise zur Interaktion:**
 
 • Bitte bedanken Sie sich nicht beim Chatbot und stellen Sie nur Fragen, die auf die Beantwortung der jeweiligen Aufgabe abzielen.
 
-Wie und ob Sie die bereitgestellten Funktionen nutzen, ist vollständig Ihnen überlassen.
+• Wie und ob Sie die bereitgestellten Funktionen nutzen, ist vollständig Ihnen überlassen.
+
+• Wie bei bekannten KI-Chatbots können Sie beliebig viele Anfragen stellen. Der KI-Steuerassistent kann sich jedoch immer nur an die letzten beiden Anfragen und die eigenen Antworten erinnern.
+
+
 """,
 
     "Augmented": """
@@ -89,9 +98,16 @@ Ein separater Button mit der Aufschrift „Gesetzestext anzeigen" öffnet ein Fe
 
 • Bitte klicken Sie nicht auf die Buttons, wenn gerade die Antwort durch den KI-Assistenten generiert wird.
 
-**Hinweise zur Interaktion:** Bitte bedanken Sie sich nicht beim Chatbot und stellen Sie nur Fragen, die auf die Beantwortung der jeweiligen Aufgabe abzielen.
+• Bitte versuchen Sie nicht in der App zurückzugehen (z. B. über die Pfeiltasten des Browsers).
 
-Wie und ob Sie diese Funktionen nutzen, ist vollständig Ihnen überlassen.
+
+**Hinweise zur Interaktion:**
+
+• Bitte bedanken Sie sich nicht beim Chatbot und stellen Sie nur Fragen, die auf die Beantwortung der jeweiligen Aufgabe abzielen.
+
+• Wie und ob Sie die bereitgestellten Funktionen nutzen, ist vollständig Ihnen überlassen.
+
+• Wie bei bekannten KI-Chatbots können Sie beliebig viele Anfragen stellen. Der KI-Steuerassistent kann sich jedoch immer nur an die letzten beiden Anfragen und die eigenen Antworten erinnern.
 """
 }
 
@@ -111,33 +127,32 @@ COMPREHENSION_BY_CONDITION = {
         {
             "question": "Für welche Gesetzesbereiche kann der Assistant Auskunft geben?",
             "options": [
-                "Strafrecht",
-                "Steuerrecht",
-                "Arbeitsrecht"
+                "Für das Strafrecht.",
+                "Für das Steuerrecht.",
+                "Für das Arbeitsrecht."
             ],
             "correct_index": 1
         }
     ],
     "Augmented": [
         {
-        "question": "Für welche Gesetzesbereiche kann der Assistant Auskunft geben?",
-        "options": [
-            "Strafrecht",
-            "Steuerrecht",
-            "Arbeitsrecht"
-        ],
-        "correct_index": 1
+            "question": "Wie sollten Sie das Fenster mit dem vollständigen Gesetzestext korrekt schließen?",
+            "options": [
+                "Ich sollte den 'Schließen'-Button am unteren Rand des Fensters verwenden.",
+                "Es ist egal, wie ich das Fenster beende – sowohl ESC-Taste als auch der 'Schließen'-Button funktionieren gleich.",
+                "Ich kann das Fenster automatisch durch Klicken außerhalb des Fensters schließen."
+            ],
+            "correct_index": 0
         },
         {
-        "question": "Wann sollten Sie den geöffneten Expander mit dem direkten Zitat schließen?",
-        "options": [
-            "Der Expander schließt sich nach fünf Sekunden automatisch.",
-            "Wenn ich mit dem Lesen fertig bin und eine neue Anfrage formulieren oder nachdenken möchte.",
-            "Expander müssen nie geschlossen werden."
-        ],
-        "correct_index": 1
-    }
-
+            "question": "Für welche Gesetzesbereiche kann der Assistant Auskunft geben?",
+            "options": [
+                "Für das Strafrecht.",
+                "Für das Steuerrecht.",
+                "Für das Arbeitsrecht."
+            ],
+            "correct_index": 1
+        }
     ]
 }
 
@@ -161,7 +176,7 @@ PRE_STUDY_SURVEY = {
 TASKS = {
     1: {
         "name": "GWG-Sofortabzug",
-        "scenario": """Sie sind selbstständig und kaufen einen neuen Laptop (Wirtschaftsgut) für Ihre berufliche Tätigkeit. Die **Anschaffungskosten** betragen genau 850€.""",
+        "scenario": """Sie sind selbstständig und kaufen einen neuen Laptop (Wirtschaftsgut) für Ihre berufliche Tätigkeit. Die **Netto-Anschaffungskosten** betragen genau 850€.""",
         "question": "Können Sie den Laptop als Betriebsausgabe sofort in diesem Wirtschaftsjahr absetzen?",
         "options": [
             "Ja, der Laptop ist sofort in diesem Wirtschaftsjahr vollständig absetzbar.",
@@ -189,7 +204,7 @@ TASKS = {
         
         "options": [
             "Nein, die Gesamtsumme des Szenarios überschreitet den Sparer-Pauschbetrag für alleinstehende.",
-            "Ja, bei mehreren Banken ist die Summe flexibel aufteilbar.",
+            "Ja, die Summe der beiden erteilten Freistellungsaufträge ist flexibel aufteilbar und zulässig.",
             "Ja, pro Bank gilt ein separater Sparer-Pauschbetrag von 1.000€.",
         ],
         "correct_answer": 0
