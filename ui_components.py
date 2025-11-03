@@ -27,16 +27,24 @@ def format_legal_text(text):
     return text
 
 def likert_select(question: str, key: str, default: int = 4) -> int:
+    """
+    7-point Likert scale selector that only reveals the selected label 
+    after the user has actually interacted with the slider.
+    """
+    
+    # Initialize session state
+    interaction_key = f"{key}_interacted"
+    
+    if interaction_key not in st.session_state:
+        st.session_state[interaction_key] = False
+    
     st.markdown(f'<span style="font-size: 1.1em">{question}</span>', unsafe_allow_html=True)
     
-    st.markdown("""
+    # CSS FOR DOTS - ALWAYS SHOW (GLOBAL, NOT SCOPED TO KEY)
+    st.markdown(f"""
     <style>
-    /* Füge Punkte auf der Slider-Linie hinzu */
-    div[data-testid="stSlider"] > div > div > div {
-        position: relative;
-    }
-    
-    div[data-testid="stSlider"] > div > div > div::before {
+    /* Show red dots - ALWAYS VISIBLE */
+    div[data-testid="stSlider"] > div > div > div::before {{
         content: '';
         position: absolute;
         width: 100%;
@@ -63,17 +71,46 @@ def likert_select(question: str, key: str, default: int = 4) -> int:
         background-repeat: no-repeat;
         pointer-events: none;
         z-index: 1;
-    }
+    }}
     </style>
     """, unsafe_allow_html=True)
     
+    # CSS FOR THUMB VISIBILITY - CONDITIONAL
+    if st.session_state[interaction_key]:
+        st.markdown(f"""
+        <style>
+        /* Make thumb visible after interaction */
+        div[data-testid="stSlider"] [role="slider"] {{
+            opacity: 1 !important;
+        }}
+        </style>
+        """, unsafe_allow_html=True)
+    else:
+        # Before interaction: only fade the thumb, NOT the track
+        st.markdown(f"""
+        <style>
+        /* Make only the thumb subtle before interaction */
+        div[data-testid="stSlider"] [role="slider"] {{
+            opacity: 0.15 !important;
+            cursor: pointer;
+        }}
+        </style>
+        """, unsafe_allow_html=True)
+    
+    # Callback function
+    def mark_interacted():
+        if not st.session_state[interaction_key]:
+            st.session_state[interaction_key] = True
+    
+    # Render slider
     result = st.select_slider(
         label="Rating",
         label_visibility="hidden",
         options=[1, 2, 3, 4, 5, 6, 7],
-        value=default,
-        format_func=lambda x: config.LIKERT_LABELS_7[x],
-        key=key
+        value=1,
+        format_func=lambda x: "",
+        key=key,
+        on_change=mark_interacted
     )
     
     st.markdown(
@@ -83,6 +120,17 @@ def likert_select(question: str, key: str, default: int = 4) -> int:
         </div>""",
         unsafe_allow_html=True
     )
+    
+    if st.session_state[interaction_key]:
+        st.markdown(
+            f"""
+            <div style="display: flex; justify-content: center; margin-bottom: 12px; font-size: 0.9em; color: #dc3545; font-weight: 600;">
+            {config.LIKERT_LABELS_7[result]}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    
     st.markdown("---")
     st.markdown('<div style="margin-bottom: 6px;"></div>', unsafe_allow_html=True)
     
@@ -91,20 +139,23 @@ def likert_select(question: str, key: str, default: int = 4) -> int:
 
 def likert_select_conf(question: str, key: str, default: int = 4) -> int:
     """
-    Likert scale selector specifically for confidence measurements.
-    Uses LIKERT_LABELS_CONF from config instead of the standard agreement scale.
+    7-point Likert scale selector for confidence measurements that only reveals 
+    the selected label after the user has actually interacted with the slider.
     """
+    
+    # Initialize session state
+    interaction_key = f"{key}_interacted"
+    
+    if interaction_key not in st.session_state:
+        st.session_state[interaction_key] = False
+    
     st.markdown(f'<span style="font-size: 1.1em">{question}</span>', unsafe_allow_html=True)
     
-    # CSS for visible scale points
-    st.markdown("""
+    # CSS FOR DOTS - ALWAYS SHOW (GLOBAL, NOT SCOPED TO KEY)
+    st.markdown(f"""
     <style>
-    /* Add points on the slider line */
-    div[data-testid="stSlider"] > div > div > div {
-        position: relative;
-    }
-    
-    div[data-testid="stSlider"] > div > div > div::before {
+    /* Show red dots - ALWAYS VISIBLE */
+    div[data-testid="stSlider"] > div > div > div::before {{
         content: '';
         position: absolute;
         width: 100%;
@@ -131,17 +182,46 @@ def likert_select_conf(question: str, key: str, default: int = 4) -> int:
         background-repeat: no-repeat;
         pointer-events: none;
         z-index: 1;
-    }
+    }}
     </style>
     """, unsafe_allow_html=True)
     
+    # CSS FOR THUMB VISIBILITY - CONDITIONAL
+    if st.session_state[interaction_key]:
+        st.markdown(f"""
+        <style>
+        /* Make thumb visible after interaction */
+        div[data-testid="stSlider"] [role="slider"] {{
+            opacity: 1 !important;
+        }}
+        </style>
+        """, unsafe_allow_html=True)
+    else:
+        # Before interaction: only fade the thumb, NOT the track
+        st.markdown(f"""
+        <style>
+        /* Make only the thumb subtle before interaction */
+        div[data-testid="stSlider"] [role="slider"] {{
+            opacity: 0.15 !important;
+            cursor: pointer;
+        }}
+        </style>
+        """, unsafe_allow_html=True)
+    
+    # Callback function
+    def mark_interacted():
+        if not st.session_state[interaction_key]:
+            st.session_state[interaction_key] = True
+    
+    # Render slider
     result = st.select_slider(
         label="Rating",
         label_visibility="hidden",
         options=[1, 2, 3, 4, 5, 6, 7],
-        value=default,
-        format_func=lambda x: config.LIKERT_LABELS_CONF[x],
-        key=key
+        value=1,
+        format_func=lambda x: "",
+        key=key,
+        on_change=mark_interacted
     )
     
     st.markdown(
@@ -151,12 +231,26 @@ def likert_select_conf(question: str, key: str, default: int = 4) -> int:
         </div>""",
         unsafe_allow_html=True
     )
+    
+    if st.session_state[interaction_key]:
+        st.markdown(
+            f"""
+            <div style="display: flex; justify-content: center; margin-bottom: 12px; font-size: 0.9em; color: #dc3545; font-weight: 600;">
+            {config.LIKERT_LABELS_CONF[result]}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    
     st.markdown("---")
     st.markdown('<div style="margin-bottom: 6px;"></div>', unsafe_allow_html=True)
     
     return result
 
-def likert_select_6(question: str, key: str, default: int = 4) -> int:
+
+
+
+def likert_select_6_old(question: str, key: str, default: int = 4) -> int:
     """6-point Likert scale selector for ATI items."""
     st.markdown(f'<span style="font-size: 1.1em">{question}</span>', unsafe_allow_html=True)
     
@@ -197,7 +291,6 @@ def likert_select_6(question: str, key: str, default: int = 4) -> int:
         label="Rating",
         label_visibility="hidden",
         options=[1, 2, 3, 4, 5, 6],
-        value=default,
         format_func=lambda x: config.LIKERT_LABELS_6[x],
         key=key
     )
@@ -209,6 +302,196 @@ def likert_select_6(question: str, key: str, default: int = 4) -> int:
         </div>""",
         unsafe_allow_html=True
     )
+    st.markdown("---")
+    st.markdown('<div style="margin-bottom: 6px;"></div>', unsafe_allow_html=True)
+    
+    return result
+
+def likert_select_6_half(question: str, key: str) -> int:
+    """
+    6-point Likert scale selector that only reveals the selected label 
+    after the user has actually interacted with the slider.
+    """
+    
+    # Initialize session state
+    interaction_key = f"{key}_interacted"
+    
+    if interaction_key not in st.session_state:
+        st.session_state[interaction_key] = False
+    
+    st.markdown(f'<span style="font-size: 1.1em">{question}</span>', unsafe_allow_html=True)
+    
+    # CSS for visible scale points
+    st.markdown(f"""
+    <style>
+    [data-testid="stSlider"] div div div::before {{
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background-image: 
+            radial-gradient(circle, #dc3545 4px, transparent 4px),
+            radial-gradient(circle, #dc3545 4px, transparent 4px),
+            radial-gradient(circle, #dc3545 4px, transparent 4px),
+            radial-gradient(circle, #dc3545 4px, transparent 4px),
+            radial-gradient(circle, #dc3545 4px, transparent 4px),
+            radial-gradient(circle, #dc3545 4px, transparent 4px);
+        background-size: 12px 12px;
+        background-position: 0 center, 20% center, 40% center, 60% center, 80% center, 100% center;
+        background-repeat: no-repeat;
+        pointer-events: none;
+        z-index: 1;
+    }}
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Callback function - ONLY fires on user interaction
+    def mark_interacted():
+        st.session_state[interaction_key] = True
+    
+    # Render slider with default value 1 (but format it as empty)
+    result = st.select_slider(
+        label="Rating",
+        label_visibility="hidden",
+        options=[1, 2, 3, 4, 5, 6],
+        value=1,  # Must provide a valid default from options
+        format_func=lambda x: "",  # Empty format = no label shown
+        key=key,
+        on_change=mark_interacted  # Fires ONLY on user interaction
+    )
+    
+    # Show scale endpoints ALWAYS
+    st.markdown(
+        f"""
+        <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.875em; color: #6c757d;">
+            <span>1 = stimmt gar nicht</span>
+            <span>6 = stimmt völlig</span>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    
+    # Show selected label ONLY after user interaction (callback fired)
+    if st.session_state[interaction_key]:
+        st.markdown(
+            f"""
+            <div style="display: flex; justify-content: center; margin-top: 8px; font-size: 0.9em; color: #dc3545; font-weight: 600;">
+            {config.LIKERT_LABELS_6[result]}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    
+    st.markdown("---")
+    st.markdown('<div style="margin-bottom: 6px"></div>', unsafe_allow_html=True)
+    
+    return result
+
+def likert_select_6(question: str, key: str) -> int:
+    """
+    6-point Likert scale selector that only reveals the selected label 
+    and visual feedback (dots and thumb) after the user has actually interacted.
+    """
+    
+    # Initialize session state
+    interaction_key = f"{key}_interacted"
+    
+    if interaction_key not in st.session_state:
+        st.session_state[interaction_key] = False
+    
+    st.markdown(f'<span style="font-size: 1.1em">{question}</span>', unsafe_allow_html=True)
+    
+    # CSS FOR 6-POINT DOTS - SCOPED TO THIS SPECIFIC KEY (ALWAYS SHOW)
+    st.markdown(f"""
+    <style>
+    /* Show 6 red dots for this specific slider */
+    .st-key-{key} div[data-testid="stSlider"] > div > div > div::before {{
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background-image: 
+            radial-gradient(circle, #dc3545 4px, transparent 4px),
+            radial-gradient(circle, #dc3545 4px, transparent 4px),
+            radial-gradient(circle, #dc3545 4px, transparent 4px),
+            radial-gradient(circle, #dc3545 4px, transparent 4px),
+            radial-gradient(circle, #dc3545 4px, transparent 4px),
+            radial-gradient(circle, #dc3545 4px, transparent 4px);
+        background-size: 12px 12px;
+        background-position: 
+            0% center,
+            20% center,
+            40% center,
+            60% center,
+            80% center,
+            100% center;
+        background-repeat: no-repeat;
+        pointer-events: none;
+        z-index: 1;
+    }}
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # CSS FOR THUMB VISIBILITY - CONDITIONAL
+    if st.session_state[interaction_key]:
+        st.markdown(f"""
+        <style>
+        /* Make thumb visible after interaction */
+        .st-key-{key} div[data-testid="stSlider"] [role="slider"] {{
+            opacity: 1 !important;
+        }}
+        </style>
+        """, unsafe_allow_html=True)
+    else:
+        # Before interaction: only fade the thumb
+        st.markdown(f"""
+        <style>
+        /* Make only the thumb subtle before interaction */
+        .st-key-{key} div[data-testid="stSlider"] [role="slider"] {{
+            opacity: 0.15 !important;
+            cursor: pointer;
+        }}
+        </style>
+        """, unsafe_allow_html=True)
+    
+    # Callback function
+    def mark_interacted():
+        if not st.session_state[interaction_key]:
+            st.session_state[interaction_key] = True
+    
+    # Render slider
+    result = st.select_slider(
+        label="Rating",
+        label_visibility="hidden",
+        options=[1, 2, 3, 4, 5, 6],
+        value=1,
+        format_func=lambda x: "",
+        key=key,
+        on_change=mark_interacted
+    )
+    
+    st.markdown(
+        f"""<div style="display: flex; justify-content: space-between; margin-top: -10px; font-size: 0.875em; color: #6c757d;">
+        <span>1 = stimmt gar nicht</span>
+        <span>6 = stimmt völlig</span>
+        </div>""",
+        unsafe_allow_html=True
+    )
+    
+    if st.session_state[interaction_key]:
+        st.markdown(
+            f"""
+            <div style="display: flex; justify-content: center; margin-bottom: 12px; font-size: 0.9em; color: #dc3545; font-weight: 600;">
+            {config.LIKERT_LABELS_6[result]}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    
     st.markdown("---")
     st.markdown('<div style="margin-bottom: 6px;"></div>', unsafe_allow_html=True)
     

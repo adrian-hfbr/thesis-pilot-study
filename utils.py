@@ -279,16 +279,14 @@ def initialize_log_files():
                 "ecl_1", "ecl_2", "ecl_3",
                 # Germane Cognitive Load (3 items)  
                 "gcl_1", "gcl_2", "gcl_3",
-                #EFFORT
-                "effort_1",
                 # Trust - Functionality (3 items)  
                 "trust_func_1", "trust_func_2", "trust_func_3",
                 # Trust - Helpfulness (4 items)  
                 "trust_help_1", "trust_help_2", "trust_help_3", "trust_help_4",
                 # Trust - Reliability (4 items) 
                 "trust_reli_1", "trust_reli_2", "trust_reli_3", "trust_reli_4",
-                # RELIANCE
-                "reliance_1",
+                # attention_check
+                "ac1",
                 # Manipulation check 
                 "manip_check_1"
             ]).to_csv(POST_SURVEY_LOG, index=False)
@@ -656,8 +654,6 @@ def log_post_survey(session_id, survey_responses, manip_check_correct=None):
                 
                 for key in ["gcl_1", "gcl_2", "gcl_3"]:
                     new_entry[key] = survey_responses.get(key)
-
-                new_entry["effort_1"] = survey_responses.get("effort_1")
                 
                 for key in ["trust_func_1", "trust_func_2", "trust_func_3"]:
                     new_entry[key] = survey_responses.get(key)
@@ -668,7 +664,7 @@ def log_post_survey(session_id, survey_responses, manip_check_correct=None):
                 for key in ["trust_reli_1", "trust_reli_2", "trust_reli_3", "trust_reli_4"]:
                     new_entry[key] = survey_responses.get(key)
 
-                new_entry["reliance_1"] = survey_responses.get("reliance_1")
+                new_entry["ac1"] = survey_responses.get("ac1")
                 
                 new_entry["manip_check_1"] = survey_responses.get("manip_check_1")
                 

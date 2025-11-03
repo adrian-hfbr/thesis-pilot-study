@@ -109,24 +109,24 @@ COMPREHENSION_BY_CONDITION = {
             "correct_index": 0
         },
         {
-            "question": "Welches Werkzeug stellt der Assistent zur Verfügung, wenn Sie seine Informationen überprüfen möchten?",
+            "question": "Für welche Gesetzesbereiche kann der Assistant Auskunft geben?",
             "options": [
-                "Eine Option zur sofortigen Anzeige des Zitats sowie einen separaten Button zum Öffnen des vollständigen Gesetzestextes.",
-                "Einen einzelnen Button 'Gesetzestext anzeigen', der eine neue Ansicht mit dem vollständigen Gesetzestext öffnet.",
-                "Der Assistent stellt keine Werkzeuge zur Überprüfung seiner Quellen zur Verfügung."
+                "Strafrecht",
+                "Steuerrecht",
+                "Arbeitsrecht"
             ],
             "correct_index": 1
         }
     ],
     "Augmented": [
         {
-            "question": "Der Assistent bietet zwei Werkzeuge zur Überprüfung seiner Quellen. Was ist der Unterschied zwischen ihnen?",
-            "options": [
-                "Es gibt nur einen einzigen Button, der den vollständigen Gesetzestext öffnet.",
-                "Ein Button 'Zitat anzeigen' zeigt sofort das unterstützende Zitat, während das andere 'Gesetzestext anzeigen' den vollständigen Gesetzesabschnitt öffnet.",
-                "Beide Werkzeuge zeigen dieselbe Information an, sie haben nur unterschiedliche Symbole."
-            ],
-            "correct_index": 1
+        "question": "Für welche Gesetzesbereiche kann der Assistant Auskunft geben?",
+        "options": [
+            "Strafrecht",
+            "Steuerrecht",
+            "Arbeitsrecht"
+        ],
+        "correct_index": 1
         },
         {
         "question": "Wann sollten Sie den geöffneten Expander mit dem direkten Zitat schließen?",
@@ -228,8 +228,8 @@ POST_STUDY_SURVEY = {
         "gcl_3": "Die Aufgabe enthielt Elemente, die mich unterstützten, den Lernstoff besser zu verstehen."
     },
 
-     "effort_items": {
-        "effort_1": "Ich habe mich angestrengt, die richtige Antwort zu finden."
+    "attention_check": {
+        "ac1": "Bitte wählen Sie hier die Antwort '5 – stimme eher zu' aus."
     },
 
     # Trust (second-order construct: Functionality, Helpfulness, Reliability)
@@ -252,20 +252,17 @@ POST_STUDY_SURVEY = {
         "trust_reli_4": "Der KI-Assistent weist bei mir keine Fehlfunktionen auf."
     },
 
-    "reliance_items": {
-        "reliance_1": "Ich war schnell bereit, die Antworten des KI-Assistenten zu akzeptieren."
-    },
-
     # Manipulation check (multiple choice; analysis compares answer to assigned condition)
     "manipulation_check": {
         "manip_check_1": {
-            "question": "Welche Aussage beschreibt die Werkzeuge zur Quellenprüfung, die Ihnen zur Verfügung standen, am besten?",
+            "question": "Welche Werkzeuge zur Quellenprüfung standen Ihnen in der Interaktion mit dem KI-Assistenten zur Verfügung",
             "options": [
-                "Nur ein Button, der den vollständigen Gesetzestext in einem neuen Fenster öffnet.",
-                "Ein Button „Zitat anzeigen“ um das passende Zitat sowie ein separater Button, um den vollständigen Gesetzestext anzuzeigen.",
-                "Es wurden keine Werkzeuge zur Quellenprüfung angeboten.",
+                "Ein Button, der den vollständigen Gesetzestext in einem neuen Fenster öffnet.",
+                "Ein Button, der das passende Zitat aus dem Gesetzestext direkt unter der Antwort anzeigt.",
+                "Beide dieser Buttons wurden angezeigt.",
+                "Keiner dieser Buttons wurde angezeigt."
             ],
-            "correct_index_augmented": 1,  # Index for Augmented condition
+            "correct_index_augmented": 2,  # Index for Augmented condition
             "correct_index_minimal": 0     # Index for Minimal condition
         }
     }

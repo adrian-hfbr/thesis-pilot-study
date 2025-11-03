@@ -139,12 +139,40 @@ def initialize_session_state():
         st.session_state.expander_then_modal_escalations = 0
         st.session_state.last_expander_click_time = None
 
+        st.session_state.postsurvey_page1_responses = {}  # Manipulation Check
+        st.session_state.postsurvey_page2_responses = {}  # Cognitive Load
+        st.session_state.postsurvey_page3_responses = {}  # Trust
+        st.session_state.current_postsurvey_page = 1
+
+
         # Initialize task-scoped histories
         for task_num in range(1, 5):  # You have 4 tasks
             if f"task_{task_num}_history" not in st.session_state:
                 st.session_state[f"task_{task_num}_history"] = []
 
 initialize_session_state()
+
+def create_postsurvey_page1():
+    return {
+        'title': 'Fragebogen nach der Studie - Teil 1 von 3',
+        'manipulation_check': content.POST_STUDY_SURVEY['manipulation_check']
+    }
+
+def create_postsurvey_page2():
+    return {
+        'title': 'Fragebogen nach der Studie - Teil 2 von 3',
+        'icl_items': content.POST_STUDY_SURVEY['icl_items'],
+        'ecl_items': content.POST_STUDY_SURVEY['ecl_items'],
+        'attention_check': content.POST_STUDY_SURVEY.get('attention_check', {}),
+        'gcl_items': content.POST_STUDY_SURVEY['gcl_items']
+    }
+
+def create_postsurvey_page3():
+    return {
+        'title': 'Fragebogen nach der Studie - Teil 3 von 3',
+        'trust_items': content.POST_STUDY_SURVEY['trust_items'],
+    }
+
 
 # --- Modal for Source Verification ---
 @st.dialog("Quelle", width="large")
@@ -169,7 +197,7 @@ def show_source_modal():
     
     legal_ref = doc.metadata.get('legal_reference_full', doc.metadata.get('legal_reference', 'Unbekannte Quelle'))
     
-    st.info(f"Hier sehen Sie den vollständigen Paragraphen ({legal_ref}). Sie müssen die relevante Passage selbst finden.")
+    st.info(f"Hier sehen Sie den vollständigen Paragraphen ({legal_ref}).")
     
     full_text = doc.page_content
     source_file = doc.metadata.get('source_file', '')
@@ -204,8 +232,6 @@ def show_source_modal():
         """,
         unsafe_allow_html=True
     )
-    
-
 
     if st.button("**Schließen**", use_container_width=True):
         finalize_modal_tracking(doc)
@@ -298,12 +324,20 @@ def render_survey(surveydict, next_step):
     responses = {}
     ati_items = surveydict.get("ati_items", [])
 
+    current_page = 1
+    if "manipulation_check" in surveydict:
+        current_page = 1  # Seite 1: Nur Manipulation Check
+    elif "icl_items" in surveydict or "ecl_items" in surveydict:
+        current_page = 2  # Seite 2: Cognitive Load
+    elif "trust_items" in surveydict:
+        current_page = 3  # Seite 3: Trust + attention_check
+
     # Generic single-scale "items" (used by PRE_STUDY_SURVEY)
     if "items" in surveydict:
         for key, question in surveydict["items"].items():
             # Use 6-point scale for ATI items, 7-point for others
             if key in ati_items:
-                responses[key] = likert_select_6(question, key, default=4)
+                responses[key] = likert_select_6(question, key)
             else:
                 responses[key] = likert_select(question, key, default=4)
 
@@ -337,24 +371,14 @@ def render_survey(surveydict, next_step):
         st.subheader("Bewertung der Interaktion")
         for key, question in surveydict["ecl_items"].items():
             responses[key] = likert_select(question, key, default=4)
+        for key, question in surveydict["attention_check"].items(): # attention_check
+            responses[key] = likert_select(question, key, default=4)
     
     # Germane Cognitive Load
     if "gcl_items" in surveydict:
         st.subheader("Lernbezogene Verarbeitung")
         for key, question in surveydict["gcl_items"].items():
             responses[key] = likert_select(question, key, default=4)
-
-    # Render EFFORT items
-    #if "effort_items" in surveydict:
-    #    st.subheader("Anstrengung bei der Aufgabenbearbeitung")
-    #    for key, question in surveydict["effort_items"].items():
-    #        responses[key] = likert_select(question, key, default=4)
-
-    # Render RELIANCE items
-    #if "reliance_items" in surveydict:
-    #    st.subheader("Bereitschaft zu akzeptieren")
-    #    for key, question in surveydict["reliance_items"].items():
-    #        responses[key] = likert_select(question, key, default=4)
     
     # Trust (functionality, helpfulness, reliability)
     if "trust_items" in surveydict:
@@ -362,7 +386,7 @@ def render_survey(surveydict, next_step):
         for key, question in surveydict["trust_items"].items():
             responses[key] = likert_select(question, key, default=4)
     
-    if st.button("Absenden"):
+    if st.button("Weiter"):
         # Validation: Check if manipulation check questions are answered
         if "manipulation_check" in surveydict:
             all_manip_answered = True
@@ -386,57 +410,77 @@ def render_survey(surveydict, next_step):
             st.session_state.current_step = next_step
             st.rerun()
         
-        # Post-study survey logging
-        elif surveydict["title"] == content.POST_STUDY_SURVEY["title"]:
-            # Calculate and STORE duration
-            if hasattr(st.session_state, 'experiment_start_time') and st.session_state.experiment_start_time:
-                st.session_state.total_experiment_duration = (datetime.now() - st.session_state.experiment_start_time).total_seconds()
+        # Post-study survey - UNTERSCHIEDLICH je nach Seite
+        elif surveydict["title"].startswith("Fragebogen nach der Studie"):
+            # ===== SEITE 1 & 2: NUR speichern, dann weiterleiten =====
+            if current_page == 1:
+                st.session_state.postsurvey_page1_responses = responses
+                st.session_state.current_step = next_step  # → poststudysurvey_page2
+                st.rerun()
+                return  # WICHTIG: Kein Logging!
             
-            # Check manipulation check correctness based on participant's condition
-            manip_check_passed = None
-            if "manipulation_check" in surveydict:
-                manip_check_passed = True
-                user_group = st.session_state.group  # "Augmented" or "Minimal"
+            elif current_page == 2:
+                st.session_state.postsurvey_page2_responses = responses
+                st.session_state.current_step = next_step  # → poststudysurvey_page3
+                st.rerun()
+                return  # WICHTIG: Kein Logging!
+            
+            # ===== SEITE 3: Responses speichern + zusammenführen + LOGGING =====
+            elif current_page == 3:
+                st.session_state.postsurvey_page3_responses = responses
                 
-                for key, mc in surveydict["manipulation_check"].items():
-                    user_answer = responses.get(key)
+                # Zusammenführen aller 3 Seiten
+                combined_responses = {}
+                combined_responses.update(st.session_state.postsurvey_page1_responses or {})
+                combined_responses.update(st.session_state.postsurvey_page2_responses or {})
+                combined_responses.update(st.session_state.postsurvey_page3_responses or {})
+                
+                # Calculate experiment duration
+                if hasattr(st.session_state, 'experiment_start_time') and st.session_state.experiment_start_time:
+                    st.session_state.total_experiment_duration = (
+                        datetime.now() - st.session_state.experiment_start_time
+                    ).total_seconds()
+                
+                # Validate manipulation check JETZT
+                manip_check_passed = None
+                if "manipulation_check" in st.session_state.postsurvey_page1_responses or combined_responses:
+                    manip_check_passed = True
+                    user_group = st.session_state.group
                     
-                    # Get the correct index for this participant's condition
-                    if user_group == "Augmented":
-                        correct_idx = mc.get("correct_index_augmented")
-                    else:  # Minimal
-                        correct_idx = mc.get("correct_index_minimal")
-                    
-                    if user_answer and correct_idx is not None:
-                        # Check if user's answer matches the condition-specific correct index
-                        user_answer_idx = mc["options"].index(user_answer)
-                        if user_answer_idx != correct_idx:
-                            manip_check_passed = False
-                            break
-            
-            log_post_survey(
-                session_id=st.session_state.session_id,
-                survey_responses=responses,
-                manip_check_correct=manip_check_passed
-            )
-
-            if hasattr(st.session_state, 'total_experiment_duration') and 'duration_logged' not in st.session_state:
-                df = pd.read_csv('logs/participants.csv')
-                df.loc[df['session_id'] == st.session_state.session_id, 'total_duration_seconds'] = st.session_state.total_experiment_duration
-                df.to_csv('logs/participants.csv', index=False)
-                st.session_state.duration_logged = True
-
-            # ===== NEW: BACKUP TO S3 =====
-            from backup_manager import backup_participant_data
-            
-            # Get Prolific ID
-            prolific_pid = st.session_state.get('prolific_pid', 'UNKNOWN')
-            
-            # Backup this participant's data to S3
-            backup_success = backup_participant_data(st.session_state.session_id, prolific_pid)
-
-            st.session_state.current_step = next_step
-            st.rerun()
+                    # Manipulation Check Validation aus content.POSTSTUDYSURVEY
+                    manip_check_def = content.POST_STUDY_SURVEY["manipulation_check"]
+                    for key, mc in manip_check_def.items():
+                        user_answer = combined_responses.get(key)
+                        correct_idx = mc.get("correct_index_augmented" if user_group == "Augmented" 
+                                           else "correct_index_minimal")
+                        
+                        if user_answer and correct_idx is not None:
+                            user_answer_idx = mc["options"].index(user_answer)
+                            if user_answer_idx != correct_idx:
+                                manip_check_passed = False
+                                break
+                
+                # LOGGING MIT KOMBINIERTEN RESPONSES
+                log_post_survey(
+                    session_id=st.session_state.session_id,
+                    survey_responses=combined_responses,  # ALLE Daten!
+                    manip_check_correct=manip_check_passed
+                )
+                
+                # Duration update
+                if hasattr(st.session_state, 'total_experiment_duration') and 'duration_logged' not in st.session_state:
+                    df = pd.read_csv('logs/participants.csv')
+                    df.loc[df['session_id'] == st.session_state.session_id, 'total_duration_seconds'] = st.session_state.total_experiment_duration
+                    df.to_csv('logs/participants.csv', index=False)
+                    st.session_state.duration_logged = True
+                
+                # Backup
+                from backup_manager import backup_participant_data
+                prolific_pid = st.session_state.get('prolific_pid', 'UNKNOWN')
+                backup_participant_data(st.session_state.session_id, prolific_pid)
+                
+                st.session_state.current_step = next_step  # → debriefing
+                st.rerun()
 
 
 def render_chat():
@@ -512,10 +556,14 @@ def render_task_post():
     post_answer = st.radio(
         "",
         options=task['options'],
-        key=f"post_task_{st.session_state.task_number}"
+        key=f"post_task_{st.session_state.task_number}",
+        index=None
     )
         
     if st.button("**Antwort final einloggen.**", type="secondary", use_container_width=False):
+        if post_answer is None:
+            st.error("Bitte wählen Sie eine Antwort aus, bevor Sie fortfahren.")
+            return
         if not st.session_state.answer_logged:
             st.session_state.answer_finalization_start_time = datetime.now()
             st.session_state.answer_logged = True
@@ -551,7 +599,10 @@ def render_task_post():
         is_correct = (selected_index == correct_answer_index)
 
         
-        if st.button("Absenden und fortfahren"):
+        if st.button("Weiter"):
+            if post_answer is None:
+                st.error("Bitte wählen Sie eine Antwort aus, bevor Sie fortfahren.")
+                return
             st.session_state.answer_logged = False
             finalize_open_quotes()
             
@@ -642,7 +693,7 @@ def render_task_post():
 
                 st.session_state.current_step = 'task_chat'
             else:
-                st.session_state.current_step = 'post_study_survey'
+                st.session_state.current_step = 'poststudysurvey_page1'
             
             st.rerun()
         
@@ -713,7 +764,11 @@ elif step == "task_chat":
     render_chat()
 elif step == "task_post":
     render_task_post()
-elif step == "post_study_survey":
-    render_survey(content.POST_STUDY_SURVEY, next_step="debriefing")
+elif step == "poststudysurvey_page1":
+    render_survey(create_postsurvey_page1(), next_step="poststudysurvey_page2")
+elif step == "poststudysurvey_page2":
+    render_survey(create_postsurvey_page2(), next_step="poststudysurvey_page3")
+elif step == "poststudysurvey_page3":
+    render_survey(create_postsurvey_page3(), next_step="debriefing")
 elif step == "debriefing":
     render_debriefing()
