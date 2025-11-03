@@ -185,7 +185,7 @@ TASKS = {
         "name": "Sparer-Pauschbetrag mehrere Banken",
         "scenario": """Sie sind alleinstehend und erzielen Kapitaleinkünfte bei zwei verschiedenen Banken. Um den **Sparer-Pauschbetrag** zu nutzen, haben Sie bei Bank A einen Freistellungsauftrag über 700€ erteilt und bei Bank B über 650€.""",
         
-        "question": "Ist diese Freistellungsaufträge bei den beiden Banken so zulässig, um den Sparer-Pauschbetrag zu nutzen?",
+        "question": "Sind diese Freistellungsaufträge bei den beiden Banken so zulässig, um den Sparer-Pauschbetrag zu nutzen?",
         
         "options": [
             "Nein, die Gesamtsumme des Szenarios überschreitet den Sparer-Pauschbetrag für alleinstehende.",
