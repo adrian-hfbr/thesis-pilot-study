@@ -183,9 +183,9 @@ TASKS = {
     },
     3: {
         "name": "Sparer-Pauschbetrag mehrere Banken",
-        "scenario": """Sie sind alleinstehend und erzielen Kapitaleinkünfte bei zwei verschiedenen Banken. Um den **Sparer-Pauschbetrag** zu nutzen, haben Sie bei jeder Bank einen Freistellungsauftrag erteilt, der je 600€ beträgt.""",
+        "scenario": """Sie sind alleinstehend und erzielen Kapitaleinkünfte bei zwei verschiedenen Banken. Um den **Sparer-Pauschbetrag** zu nutzen, haben Sie bei Bank A einen Freistellungsauftrag über 700€ erteilt und bei Bank B über 650€.""",
         
-        "question": "Ist diese Aufteilung der Freistellungsaufträge zulässig, um den Sparer-Pauschbetrag zu nutzen?",
+        "question": "Ist diese Freistellungsaufträge bei den beiden Banken so zulässig, um den Sparer-Pauschbetrag zu nutzen?",
         
         "options": [
             "Nein, die Gesamtsumme des Szenarios überschreitet den Sparer-Pauschbetrag für alleinstehende.",
@@ -196,7 +196,7 @@ TASKS = {
     },
     4: {
     'name': 'Doppelte Haushaltsführung - Unterkunftskosten',
-    'scenario': '''Sie sind als Ingenieur in München tätig und führen eine **doppelte Haushaltsführung**, da Ihre Familie noch in Hamburg wohnt.  Ihre Unterkunft in München kostet 1.400€ Miete pro Monat. Da Sie sich die Wohnung mit einem Kollegen teilen, zahlen Sie nur 50 Prozent der Miete. ''',
+    'scenario': '''Sie sind als Ingenieur:in in München tätig und führen eine **doppelte Haushaltsführung**, da Ihre Familie noch in Hamburg wohnt. Ihre Unterkunft in München kostet 1.400€ Miete pro Monat. Da Sie sich die Wohnung mit einem Kollegen teilen, zahlen Sie nur 50 Prozent der Miete. ''',
     
     'question': '''Kann die volle Miete für die Unterkunft als Werbungskosten bei Ihnen abgesetzt werden?''',
     
@@ -295,8 +295,8 @@ GRUNDPRINZIPIEN DER RECHTSANWENDUNG:
 
 2. ZUSAMMENGESETZTE SACHVERHALTE
    Wenn eine Anfrage mehrere Elemente, Beträge oder Komponenten enthält:
-   - Analysiere jedes Element separat im Hinblick auf die gesetzlichen Anforderungen
-   - Stelle klar dar, welche rechtlichen Voraussetzungen für welches Element gelten
+   - Analysiere jedes Element und prüfe, ob Elemente addiert werden müssen im Hinblick auf die gesetzlichen Anforderungen
+   - Stelle klar dar, welche rechtlichen Voraussetzungen für welches Element oder welche Summe gelten
    - Gib konkrete Zahlen an, wenn diese für die Rechtsfolge entscheidend sind
 
 3. HIERARCHISCHE REGELUNGEN

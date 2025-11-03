@@ -19,7 +19,8 @@ from behavioral_tracking import (
     update_last_action_time,
     finalize_open_quotes,
     track_quote_toggle,
-    track_modal_button_click
+    track_modal_button_click,
+    finalize_modal_if_open
 )
 from utils import log_interaction
 
@@ -87,6 +88,7 @@ def render_augmented_buttons(doc, legal_ref, url, message_index, task_number, qu
     
     button_key = f"btn_quote_{message_index}"
     if st.button(button_label, key=button_key, use_container_width=True):
+        finalize_modal_if_open()
         # Calculate opening/closing BEFORE toggling
         is_opening = not st.session_state[quote_visible_key]
         
@@ -118,6 +120,7 @@ def render_augmented_buttons(doc, legal_ref, url, message_index, task_number, qu
     modal_button_key = f"btn_modal_aug_{message_index}"
     if st.button("Gesetzestext anzeigen", key=modal_button_key, use_container_width=True):
         finalize_open_quotes()
+        finalize_modal_if_open()
         track_modal_button_click()
         update_last_action_time()
         # Debounce: only track if this button hasn't been processed
@@ -261,7 +264,7 @@ def handle_user_input(user_input, task_number, history_key, pipeline):
         return
         
     finalize_open_quotes()
-    
+    finalize_modal_if_open()
     update_last_action_time()
     
     # Determine event type (initial vs follow-up)

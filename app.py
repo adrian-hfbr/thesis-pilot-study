@@ -18,7 +18,8 @@ from behavioral_tracking import (
     update_last_action_time,
     finalize_open_quotes,
     finalize_modal_tracking,
-    calculate_final_metrics
+    calculate_final_metrics,
+    finalize_modal_if_open
 )
 
 from task_renderer import (
@@ -494,6 +495,7 @@ def render_chat():
     if len(st.session_state.messages) > 0:
         if st.button("Ich möchte die Frage beantworten.", type="primary"):
             finalize_open_quotes()
+            finalize_modal_if_open()
             update_last_action_time()
             st.session_state.answer_finalization_start_time = datetime.now()
             st.session_state.current_step = "task_post"
@@ -527,124 +529,125 @@ def render_task_post():
         else:
             st.info("Antwort wurde bereits eingeloggt.")
     
-    st.divider()
-    st.markdown("**Bitte stimmen Sie ab:**")
+    if st.session_state.get("answer_logged", False) == True:
+        st.divider()
+        st.markdown("**Bitte stimmen Sie ab:**")
 
-    confidence = likert_select_conf(
-        "Ich bin mir sicher bei meiner Antwort.",
-        key=f"conf_{st.session_state.task_number}",
-        default=4
-    )
+        confidence = likert_select_conf(
+            "Ich bin mir sicher bei meiner Antwort.",
+            key=f"conf_{st.session_state.task_number}",
+            default=4
+        )
 
-    if 'answer_logged' not in st.session_state:
-        st.session_state.answer_logged = False
+        # Get task content for correct answer
+        task_content = content.TASKS[st.session_state.task_number]
 
-    # Get task content for correct answer
-    task_content = content.TASKS[st.session_state.task_number]
+        # Convert selected answer to letter (A/B/C)
+        selected_index = task_content['options'].index(post_answer)
+        selected_letter = ['A', 'B', 'C'][selected_index]
 
-    # Convert selected answer to letter (A/B/C/D)
-    selected_index = task_content['options'].index(post_answer)
-    selected_letter = ['A', 'B', 'C'][selected_index]
+        # Calculate if answer is correct
+        correct_answer_index = task_content['correct_answer']
+        is_correct = (selected_index == correct_answer_index)
 
-    # Calculate if answer is correct
-    correct_answer_index = task_content['correct_answer']
-    is_correct = (selected_index == correct_answer_index)
-
-    
-    if st.button("Absenden und fortfahren"):
-        st.session_state.answer_logged = False
-        finalize_open_quotes()
         
-        end_time = datetime.now()
-        
-        if st.session_state.task_start_time:
-            duration = (end_time - st.session_state.task_start_time).total_seconds()
-        else:
-            duration = -1
+        if st.button("Absenden und fortfahren"):
+            st.session_state.answer_logged = False
+            finalize_open_quotes()
+            
+            end_time = datetime.now()
+            
+            if st.session_state.task_start_time:
+                duration = (end_time - st.session_state.task_start_time).total_seconds()
+            else:
+                duration = -1
+                log_interaction(
+                    session_id=st.session_state.session_id,
+                    task_number=st.session_state.task_number,
+                    event_type="error",
+                    details="Task start time was None - duration could not be calculated"
+                )
+            
+            # Calculate final metrics using behavioral_tracking module
+            metrics = calculate_final_metrics()
+            mean_answer_reading = metrics['mean_answer_reading']
+            
+            # Determine expander_clicks value based on condition
+            expander_clicks_value = (st.session_state.expander_clicks_total 
+                                    if st.session_state.group == "Augmented" else None)
+            
+            log_task_data(
+                session_id=st.session_state.session_id,
+                task_number=st.session_state.task_number,
+                post_answer=selected_letter,
+                is_correct=is_correct,
+                confidence=confidence,
+                duration=round(duration, 1) if duration >= 0 else duration,
+                expander_clicks_total=expander_clicks_value,
+                modal_clicks_total=st.session_state.modal_clicks_total,
+                expander_clicks_verification=st.session_state.expander_clicks_verification,
+                modal_clicks_verification=st.session_state.modal_clicks_verification,
+                followup_questions=st.session_state.followup_count,
+                cumulative_modal_dwell=st.session_state.cumulative_modal_dwell,
+                cumulative_expander_dwell=st.session_state.cumulative_expander_dwell,
+                mean_answer_reading_time=mean_answer_reading,
+                answer_finalization_time=metrics['answer_finalization_time'],
+                first_click_latency=st.session_state.first_click_latency,
+                clicks_after_followups=st.session_state.clicks_after_followups,
+                prompts_before_first_verification=st.session_state.prompts_before_first_verification,
+                expander_then_modal_escalations=st.session_state.expander_then_modal_escalations,
+            )
+            
             log_interaction(
                 session_id=st.session_state.session_id,
                 task_number=st.session_state.task_number,
-                event_type="error",
-                details="Task start time was None - duration could not be calculated"
+                event_type="task_completed",
+                details=f"Duration: {duration:.2f}s, Answer submitted: {post_answer}",
+                selected_answer=selected_letter
             )
-        
-        # Calculate final metrics using behavioral_tracking module
-        metrics = calculate_final_metrics()
-        mean_answer_reading = metrics['mean_answer_reading']
-        
-        # Determine expander_clicks value based on condition
-        expander_clicks_value = (st.session_state.expander_clicks_total 
-                                if st.session_state.group == "Augmented" else None)
-        
-        log_task_data(
-            session_id=st.session_state.session_id,
-            task_number=st.session_state.task_number,
-            post_answer=selected_letter,
-            is_correct=is_correct,
-            confidence=confidence,
-            duration=round(duration, 1) if duration >= 0 else duration,
-            expander_clicks_total=expander_clicks_value,
-            modal_clicks_total=st.session_state.modal_clicks_total,
-            expander_clicks_verification=st.session_state.expander_clicks_verification,
-            modal_clicks_verification=st.session_state.modal_clicks_verification,
-            followup_questions=st.session_state.followup_count,
-            cumulative_modal_dwell=st.session_state.cumulative_modal_dwell,
-            cumulative_expander_dwell=st.session_state.cumulative_expander_dwell,
-            mean_answer_reading_time=mean_answer_reading,
-            answer_finalization_time=metrics['answer_finalization_time'],
-            first_click_latency=st.session_state.first_click_latency,
-            clicks_after_followups=st.session_state.clicks_after_followups,
-            prompts_before_first_verification=st.session_state.prompts_before_first_verification,
-            expander_then_modal_escalations=st.session_state.expander_then_modal_escalations,
-        )
-        
-        log_interaction(
-            session_id=st.session_state.session_id,
-            task_number=st.session_state.task_number,
-            event_type="task_completed",
-            details=f"Duration: {duration:.2f}s, Answer submitted: {post_answer}",
-            selected_answer=selected_letter
-        )
-        
-        # Reset for next task or proceed to post-survey
-        if st.session_state.task_number < len(content.TASKS):
-            st.session_state.task_number += 1
-            # Reset all task-specific variables
-            st.session_state.messages = []
-            st.session_state.responses = {}
-            st.session_state.task_start_time = None
-            st.session_state.question_count = 0
-            st.session_state.button_clicks_processed = set()
-            st.session_state.expander_clicks_total = 0
-            st.session_state.modal_clicks_total = 0
-            st.session_state.followup_count = 0
-            st.session_state.modal_opened_time = None
-            st.session_state.answer_finalization_start_time = None
             
-            # Reset enhanced tracking variables
-            st.session_state.last_answer_time = None
-            st.session_state.last_action_time = None
-            st.session_state.answer_reading_times = []
-            st.session_state.cumulative_modal_dwell = 0
-            st.session_state.cumulative_expander_dwell = 0
-            st.session_state.first_click_happened = False
-            st.session_state.first_click_latency = None
-            st.session_state.clicks_after_followups = 0
-            st.session_state.expander_clicks_verification = 0
-            st.session_state.modal_clicks_verification = 0            
-            st.session_state.prompts_before_first_verification = None
-            st.session_state.expander_then_modal_escalations = 0
-            st.session_state.last_expander_click_time = None
+            # Reset for next task or proceed to post-survey
+            if st.session_state.task_number < len(content.TASKS):
+                st.session_state.task_number += 1
+                # Reset all task-specific variables
+                st.session_state.messages = []
+                st.session_state.responses = {}
+                st.session_state.task_start_time = None
+                st.session_state.question_count = 0
+                st.session_state.button_clicks_processed = set()
+                st.session_state.expander_clicks_total = 0
+                st.session_state.modal_clicks_total = 0
+                st.session_state.followup_count = 0
+                st.session_state.modal_opened_time = None
+                st.session_state.answer_finalization_start_time = None
+                
+                # Reset enhanced tracking variables
+                st.session_state.last_answer_time = None
+                st.session_state.last_action_time = None
+                st.session_state.answer_reading_times = []
+                st.session_state.cumulative_modal_dwell = 0
+                st.session_state.cumulative_expander_dwell = 0
+                st.session_state.first_click_happened = False
+                st.session_state.first_click_latency = None
+                st.session_state.clicks_after_followups = 0
+                st.session_state.expander_clicks_verification = 0
+                st.session_state.modal_clicks_verification = 0            
+                st.session_state.prompts_before_first_verification = None
+                st.session_state.expander_then_modal_escalations = 0
+                st.session_state.last_expander_click_time = None
 
-            for key in list(st.session_state.keys()):
-                if key.startswith("quote_visible_") or key.startswith("quote_timestamp_"):
-                    del st.session_state[key]
+                for key in list(st.session_state.keys()):
+                    if key.startswith("quote_visible_") or key.startswith("quote_timestamp_"):
+                        del st.session_state[key]
 
-            st.session_state.current_step = 'task_chat'
-        else:
-            st.session_state.current_step = 'post_study_survey'
+                st.session_state.current_step = 'task_chat'
+            else:
+                st.session_state.current_step = 'post_study_survey'
+            
+            st.rerun()
         
-        st.rerun()
+    if 'answer_logged' not in st.session_state:
+        st.session_state.answer_logged = False
 
 def render_debriefing():
     st.header("Vielen Dank für Ihre Teilnahme!")

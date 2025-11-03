@@ -208,3 +208,47 @@ def calculate_final_metrics():
         'mean_answer_reading': mean_answer_reading,
         'answer_finalization_time': answer_finalization_time
     }
+
+def finalize_modal_if_open():
+    """
+    Auto-finalizes modal tracking if the modal is still open when a subsequent action occurs.
+    This mirrors the logic used in finalize_open_quotes() for expanders.
+    Called whenever a user takes an action that should close any open verification elements.
+    """
+    if st.session_state.modal_opened_time is not None and st.session_state.modal_doc is not None:
+        # Modal was opened but never explicitly closed via "Schließen" button
+        now = datetime.now()
+        doc = st.session_state.modal_doc
+        dwelltime = (now - st.session_state.modal_opened_time).total_seconds()
+        
+        legalref_clean = doc.metadata.get("legal_reference", "Unknown")
+        group = st.session_state.get("group", "Minimal")
+        event_type = "modal_augmented" if group == "Augmented" else "modal_minimal"
+        
+        if dwelltime >= config.MINIMUM_DWELL_TIME_MODAL:
+            st.session_state.cumulative_modal_dwell += dwelltime
+            st.session_state.modal_clicks_verification += 1
+            
+            if not st.session_state.get("first_verification_occurred", False):
+                st.session_state.first_verification_occurred = True
+                st.session_state.prompts_before_first_verification = st.session_state.question_count
+            
+            log_interaction(
+                session_id=st.session_state.session_id,
+                task_number=st.session_state.task_number,
+                event_type=f"{event_type}_auto",  # Mark as auto-closed
+                details=f"{legalref_clean} (auto-closed)",
+                dwell_time=dwelltime
+            )
+        else:
+            log_interaction(
+                session_id=st.session_state.session_id,
+                task_number=st.session_state.task_number,
+                event_type=f"{event_type}_brief_auto",
+                details=f"{legalref_clean} (below threshold)",
+                dwell_time=dwelltime
+            )
+        
+        # Clean up modal state
+        st.session_state.modal_doc = None
+        st.session_state.modal_opened_time = None
