@@ -488,6 +488,23 @@ def render_chat():
     Main chat/task interface rendering function.
     Now uses extracted task_renderer functions for better modularity.
     """
+    if "modal_was_open" not in st.session_state:
+        st.session_state.modal_was_open = False
+    
+    if st.session_state.modal_was_open and not st.session_state.get("modal_doc"):
+        # Modal was open but is now closed without explicit button click
+        finalize_modal_if_open()
+        st.session_state.modal_was_open = False
+        log_interaction(
+            session_id=st.session_state.session_id,
+            task_number=st.session_state.task_number,
+            event_type="modal_closed_untracked",
+            details="Modal closed via ESC or outside click (unintended)"
+        )
+    
+    # Track current modal state
+    if st.session_state.get("modal_doc"):
+        st.session_state.modal_was_open = True
     # Initialize task state on first render
     if st.session_state.task_start_time is None:
         st.session_state.task_start_time = datetime.now()

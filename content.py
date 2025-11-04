@@ -37,7 +37,7 @@ Ein Klick auf diesen Button öffnet ein Fenster mit dem vollständigen Gesetzesp
 
 • Bitte verwenden Sie den „Schließen"-Button am unteren Rand des Fensters, wenn Sie den Gesetzestext wieder verlassen möchten.
 
-• Bitte versuchen Sie nicht in der App zurückzugehen (z. B. über die Pfeiltasten des Browsers).
+• Bitte verwenden Sie nicht die Zurück-Funktion des Browsers (z. B. die Pfeiltasten).
 
 • Bitte klicken Sie nicht auf den Button, wenn gerade die Antwort durch den KI-Assistenten generiert wird.
 
@@ -98,7 +98,7 @@ Ein separater Button mit der Aufschrift „Gesetzestext anzeigen" öffnet ein Fe
 
 • Bitte klicken Sie nicht auf die Buttons, wenn gerade die Antwort durch den KI-Assistenten generiert wird.
 
-• Bitte versuchen Sie nicht in der App zurückzugehen (z. B. über die Pfeiltasten des Browsers).
+• Bitte verwenden Sie nicht die Zurück-Funktion des Browsers (z. B. die Pfeiltasten).
 
 
 **Hinweise zur Interaktion:**
