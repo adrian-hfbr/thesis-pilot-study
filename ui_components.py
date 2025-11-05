@@ -4,9 +4,6 @@ import re
 
 def format_legal_text(text):
     """Format German legal text with proper highlighting"""
-    # Highlight paragraph headers like "§35a EStG"
-    # Highlight paragraph headers like "§35a EStG" 
-    # Highlight paragraph headers like "§35a" (WITHOUT following text)
     text = re.sub(r'(§\s*\d+[a-z]?)\b',
                 r'<strong style="color: #2c5aa0; font-size: 17px;">\1</strong>',
                 text)

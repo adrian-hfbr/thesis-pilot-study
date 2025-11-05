@@ -301,7 +301,7 @@ class RAGPipeline:
             ]
             
             useful_history = [
-                turn for turn in chat_history[-2:]
+                turn for turn in chat_history[-4:]
                 if not any(keyword in turn['answer'].lower() for keyword in no_answer_phrases)
             ]
             
@@ -312,7 +312,7 @@ class RAGPipeline:
                     for turn in useful_history
                 ])
                 
-                contextualized_query = f"""Gesprächskontext für dieses Steuerszenario:
+                contextualized_query = f"""Bisheriger Gesprächskontext für dieses Steuerszenario:
                 {history_text}
 
                 Aktuelle Frage: {query}
@@ -320,7 +320,6 @@ class RAGPipeline:
                 Anweisungen: Falls die aktuelle Frage sich auf vorherige Antworten bezieht ("das", "dieser Betrag", "die Regelung", etc.), nutze den obigen Gesprächsverlauf, um die Frage zu verstehen."""
             else:
                 contextualized_query = query
-                print("[CONTEXT] All history filtered out - treating as fresh query")
         else:
             contextualized_query = query
 

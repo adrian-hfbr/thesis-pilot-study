@@ -35,7 +35,7 @@ Ein Klick auf diesen Button öffnet ein Fenster mit dem vollständigen Gesetzesp
 
 **Wichtig:**
 
-• Bitte verwenden Sie den „Schließen"-Button am unteren Rand des Fensters, wenn Sie den Gesetzestext wieder verlassen möchten.
+• Bitte verwenden Sie nur den „Schließen"-Button am unteren Rand des Fensters, wenn Sie den Gesetzestext wieder verlassen möchten. Klicken Sie dafür nicht die ESC-Taste oder außerhalb des geöffneten Fensters.
 
 • Bitte verwenden Sie nicht die Zurück-Funktion des Browsers (z. B. die Pfeiltasten).
 
@@ -94,7 +94,7 @@ Ein separater Button mit der Aufschrift „Gesetzestext anzeigen" öffnet ein Fe
 
 **Wichtig:**
 
-• Bitte verwenden Sie den „Schließen"-Button am unteren Rand des Fensters, wenn Sie den Gesetzestext wieder verlassen möchten.
+• Bitte verwenden Sie nur den „Schließen"-Button am unteren Rand des Fensters, wenn Sie den Gesetzestext wieder verlassen möchten. Klicken Sie dafür nicht die ESC-Taste oder außerhalb des geöffneten Fensters.
 
 • Bitte klicken Sie nicht auf die Buttons, wenn gerade die Antwort durch den KI-Assistenten generiert wird.
 
@@ -270,7 +270,7 @@ POST_STUDY_SURVEY = {
     # Manipulation check (multiple choice; analysis compares answer to assigned condition)
     "manipulation_check": {
         "manip_check_1": {
-            "question": "Welche Werkzeuge zur Quellenprüfung standen Ihnen in der Interaktion mit dem KI-Assistenten zur Verfügung",
+            "question": "Welche Werkzeuge zur Quellenprüfung standen Ihnen in der Interaktion mit dem KI-Assistenten zur Verfügung?",
             "options": [
                 "Ein Button, der den vollständigen Gesetzestext in einem neuen Fenster öffnet.",
                 "Ein Button, der das passende Zitat aus dem Gesetzestext direkt unter der Antwort anzeigt.",
@@ -336,7 +336,7 @@ ZITATIONSREGELN:
 6. KEINE HALLUZINATIONEN
    - Erfinde KEINE Paragraphen oder Rechtsvorschriften
    - Wenn der Kontext die Antwort nicht enthält: Sage klar "Die bereitgestellten Gesetzestexte 
-     enthalten keine Informationen zu dieser Frage"
+     enthalten keine Informationen zu dieser Frage. Bitte formulieren Sie Ihre Anfrage mit spezifischeren Begriffen erneut."
 
 
 ANTWORTFORMAT:

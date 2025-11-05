@@ -195,6 +195,8 @@ def initialize_log_files():
         try:
             pd.DataFrame(columns=[
                 "session_id",           # UUID v4 for anonymization
+                "study_id",
+                "prolific_session_id",
                 "prolific_pid",         # Prolific participant ID for payment
                 "timestamp",            # ISO 8601 format session start time
                 "experimental_group",   # "Augmented" or "Minimal" condition
@@ -320,7 +322,7 @@ def get_session_id():
 # Only the write operation itself is protected.
 # ============================================================================
 
-def log_participant_info(session_id, prolific_pid, group, survey_responses, total_duration=None):
+def log_participant_info(session_id, study_id, prolific_session_id, prolific_pid, group, survey_responses, total_duration=None):
     """
     Logs participant demographic data and experimental condition assignment.
     
@@ -352,6 +354,8 @@ def log_participant_info(session_id, prolific_pid, group, survey_responses, tota
             with file_lock_context(PARTICIPANTS_LOG, timeout=10):
                 new_entry = {
                     "session_id": session_id,
+                    "study_id": study_id,
+                    "prolific_session_id": prolific_session_id,
                     "prolific_pid": prolific_pid,
                     "timestamp": datetime.now().isoformat(),
                     "experimental_group": group,
@@ -547,7 +551,7 @@ def log_interaction(session_id, task_number, event_type, details, selected_answe
     max_retries = 4
     for attempt in range(max_retries):
         try:
-            with file_lock_context(INTERACTIONS_LOG, timeout=5):
+            with file_lock_context(INTERACTIONS_LOG, timeout=10):
                 # Build entry dict
                 new_entry = {
                     "session_id": session_id,
@@ -609,7 +613,7 @@ def log_interaction(session_id, task_number, event_type, details, selected_answe
                 
                 # No st.stop() - continue silently for interactions
 
-def log_post_survey(session_id, survey_responses, manip_check_correct=None):
+def log_post_survey(session_id, survey_responses, manip_check_correct=None, total_duration=None):
     """
     Logs post-study questionnaire responses including cognitive load, trust, and
     manipulation check validation.
@@ -687,7 +691,17 @@ def log_post_survey(session_id, survey_responses, manip_check_correct=None):
                         raise RuntimeError(f"Session {session_id} not found in post-survey after write")
                 except Exception as verify_error:
                     raise RuntimeError(f"Write verification failed: {verify_error}")
-                
+            
+            if total_duration is not None:
+                try:
+                    with file_lock_context(PARTICIPANTS_LOG, timeout=10):
+                        df = pd.read_csv(PARTICIPANTS_LOG)
+                        df.loc[df['session_id'] == session_id, 'total_duration_seconds'] = total_duration
+                        df.to_csv(PARTICIPANTS_LOG, index=False)
+                except Exception as e:
+                    _log_system_error('duration_update_failed', f"Session {session_id} | Duration: {total_duration}s | Error: {type(e).__name__}: {str(e)}")
+                    # Don't raise - duration update failure shouldn't stop completion
+
             return  # Success
             
         except Exception as e:

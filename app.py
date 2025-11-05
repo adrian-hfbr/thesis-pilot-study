@@ -91,14 +91,24 @@ def initialize_session_state():
     if 'experiment_start_time' not in st.session_state:
         st.session_state.experiment_start_time = datetime.now()
         st.session_state.session_id = get_session_id()
+
+        # URL EXTRACTION - Always initialize these
+        if "prolific_pid" not in st.session_state:
+            try:
+                st.session_state.prolific_pid = st.query_params.get("PROLIFIC_PID", "")
+            except Exception:
+                st.session_state.prolific_pid = ""
         
-        prolific_pid = ""
-        try:
-            prolific_pid = st.query_params.get("PROLIFIC_PID", "")
-        except Exception:
-            pass
-        st.session_state.prolific_pid = prolific_pid
+        if "prolific_session_id" not in st.session_state:
+            prolific_session_id = st.query_params.get("SESSION_ID", "")
+            st.session_state.prolific_session_id = prolific_session_id if prolific_session_id else get_session_id()
         
+        if "study_id" not in st.session_state:
+            try:
+                st.session_state.study_id = st.query_params.get("STUDY_ID", "")
+            except Exception:
+                st.session_state.study_id = ""
+
         st.session_state.messages = []
         st.session_state.responses = {}
         st.session_state.task_start_time = None
@@ -197,7 +207,7 @@ def show_source_modal():
     
     legal_ref = doc.metadata.get('legal_reference_full', doc.metadata.get('legal_reference', 'Unbekannte Quelle'))
     
-    st.info(f"Hier sehen Sie den vollständigen Paragraphen ({legal_ref}).")
+    st.info(f"Hier sehen Sie den vollständigen Paragraphen ({legal_ref}). Schließen Sie das Fenster bitte ausschließlich über den 'Schließen'-Button.")
     
     full_text = doc.page_content
     source_file = doc.metadata.get('source_file', '')
@@ -322,7 +332,6 @@ def render_instructions_and_comprehension():
 def render_survey(surveydict, next_step):
     st.header(surveydict["title"])
     responses = {}
-    ati_items = surveydict.get("ati_items", [])
 
     current_page = 1
     if "manipulation_check" in surveydict:
@@ -332,16 +341,18 @@ def render_survey(surveydict, next_step):
     elif "trust_items" in surveydict:
         current_page = 3  # Seite 3: Trust + attention_check
 
+    # Track total items and interacted items
+    total_items = 0
+    interacted_items = 0
+
     # Generic single-scale "items" (used by PRE_STUDY_SURVEY)
     if "items" in surveydict:
         for key, question in surveydict["items"].items():
-            # Use 6-point scale for ATI items, 7-point for others
-            if key in ati_items:
-                responses[key] = likert_select_6(question, key)
-            else:
-                responses[key] = likert_select(question, key, default=4)
+            total_items += 1
+            responses[key] = likert_select(question, key, default=4)
+            if st.session_state.get(f"{key}_interacted", False):
+                interacted_items += 1
 
-    
     # Manipulation check (multiple choice)
     if "manipulation_check" in surveydict:
         st.subheader("Bewertung des KI-Assistenten")
@@ -358,35 +369,64 @@ def render_survey(surveydict, next_step):
                 key=key,
                 label_visibility="collapsed"
             )
+            total_items += 1
+            if responses[key] is not None:
+                interacted_items += 1
         st.divider()
     
     # Intrinsic Cognitive Load
     if "icl_items" in surveydict:
         st.subheader("Inhaltliche Anforderungen")
         for key, question in surveydict["icl_items"].items():
+            total_items += 1
             responses[key] = likert_select(question, key, default=4)
+            if st.session_state.get(f"{key}_interacted", False):
+                interacted_items += 1
     
     # Extraneous Cognitive Load
     if "ecl_items" in surveydict:
         st.subheader("Bewertung der Interaktion")
         for key, question in surveydict["ecl_items"].items():
+            total_items += 1
             responses[key] = likert_select(question, key, default=4)
-        for key, question in surveydict["attention_check"].items(): # attention_check
+            if st.session_state.get(f"{key}_interacted", False):
+                interacted_items += 1
+        for key, question in surveydict["attention_check"].items():  # attention_check
+            total_items += 1
             responses[key] = likert_select(question, key, default=4)
+            if st.session_state.get(f"{key}_interacted", False):
+                interacted_items += 1
     
     # Germane Cognitive Load
     if "gcl_items" in surveydict:
         st.subheader("Lernbezogene Verarbeitung")
         for key, question in surveydict["gcl_items"].items():
+            total_items += 1
             responses[key] = likert_select(question, key, default=4)
+            if st.session_state.get(f"{key}_interacted", False):
+                interacted_items += 1
     
     # Trust (functionality, helpfulness, reliability)
     if "trust_items" in surveydict:
         st.subheader("Bewertung des Systems")
         for key, question in surveydict["trust_items"].items():
+            total_items += 1
             responses[key] = likert_select(question, key, default=4)
+            if st.session_state.get(f"{key}_interacted", False):
+                interacted_items += 1
     
-    if st.button("Weiter"):
+    # Check if all items were interacted with
+    all_interacted = (interacted_items == total_items) and total_items > 0
+    
+    # Show red warning text if not all items are completed
+    if not all_interacted:
+        st.markdown(
+            '<p style="color: #dc3545; font-weight: 600; margin-top: 10px; margin-bottom: 10px;">'
+            'Bitte vervollständigen Sie den Fragebogen, um fortzufahren.</p>',
+            unsafe_allow_html=True
+        )
+    
+    if st.button("Weiter", disabled=not all_interacted):
         # Validation: Check if manipulation check questions are answered
         if "manipulation_check" in surveydict:
             all_manip_answered = True
@@ -398,10 +438,13 @@ def render_survey(surveydict, next_step):
             if not all_manip_answered:
                 st.error("Bitte beantworten Sie die Fragen, bevor Sie fortfahren.")
                 return
+        
         # Pre-study survey logging
         if surveydict["title"] == content.PRE_STUDY_SURVEY["title"]:
             log_participant_info(
                 session_id=st.session_state.session_id,
+                study_id=st.session_state.study_id,
+                prolific_session_id=st.session_state.prolific_session_id,
                 prolific_pid=st.session_state.prolific_pid,
                 group=st.session_state.group,
                 survey_responses=responses,
@@ -447,7 +490,7 @@ def render_survey(surveydict, next_step):
                     manip_check_passed = True
                     user_group = st.session_state.group
                     
-                    # Manipulation Check Validation aus content.POSTSTUDYSURVEY
+                    # Manipulation Check Validation aus content.POST_STUDY_SURVEY
                     manip_check_def = content.POST_STUDY_SURVEY["manipulation_check"]
                     for key, mc in manip_check_def.items():
                         user_answer = combined_responses.get(key)
@@ -460,19 +503,12 @@ def render_survey(surveydict, next_step):
                                 manip_check_passed = False
                                 break
                 
-                # LOGGING MIT KOMBINIERTEN RESPONSES
                 log_post_survey(
                     session_id=st.session_state.session_id,
-                    survey_responses=combined_responses,  # ALLE Daten!
-                    manip_check_correct=manip_check_passed
+                    survey_responses=combined_responses,
+                    manip_check_correct=manip_check_passed,
+                    total_duration=st.session_state.total_experiment_duration
                 )
-                
-                # Duration update
-                if hasattr(st.session_state, 'total_experiment_duration') and 'duration_logged' not in st.session_state:
-                    df = pd.read_csv('logs/participants.csv')
-                    df.loc[df['session_id'] == st.session_state.session_id, 'total_duration_seconds'] = st.session_state.total_experiment_duration
-                    df.to_csv('logs/participants.csv', index=False)
-                    st.session_state.duration_logged = True
                 
                 # Backup
                 from backup_manager import backup_participant_data
@@ -481,6 +517,7 @@ def render_survey(surveydict, next_step):
                 
                 st.session_state.current_step = next_step  # → debriefing
                 st.rerun()
+
 
 
 def render_chat():
@@ -603,6 +640,30 @@ def render_task_post():
             key=f"conf_{st.session_state.task_number}",
             default=4
         )
+        # Track interaction status
+        total_items = 2  # Multiple choice + confidence
+        interacted_items = 0
+        
+        # Check if multiple choice was answered
+        if post_answer is not None:
+            interacted_items += 1
+        
+        # Check if confidence was interacted with
+        conf_key = f"conf_{st.session_state.task_number}"
+        if st.session_state.get(f"{conf_key}_interacted", False):
+            interacted_items += 1
+        
+        # Check if all items were interacted with
+        all_interacted = (interacted_items == total_items)
+        
+        
+        # Show red warning text if not all items are completed
+        if not all_interacted:
+            st.markdown(
+                '<p style="color: #dc3545; font-weight: 600; margin-top: 10px; margin-bottom: 10px;">'
+                'Bitte vervollständigen Sie den Fragebogen, um fortzufahren.</p>',
+                unsafe_allow_html=True
+            )
 
         # Get task content for correct answer
         task_content = content.TASKS[st.session_state.task_number]
@@ -616,7 +677,7 @@ def render_task_post():
         is_correct = (selected_index == correct_answer_index)
 
         
-        if st.button("Weiter"):
+        if st.button("Weiter", disabled=not all_interacted):
             if post_answer is None:
                 st.error("Bitte wählen Sie eine Antwort aus, bevor Sie fortfahren.")
                 return
