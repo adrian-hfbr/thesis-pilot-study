@@ -387,8 +387,7 @@ class RAGPipeline:
 
 
         # ════════════════════════════════════════════════════════════════
-        # DEBUG OUTPUT (optional)
-        # ════════════════════════════════════════════════════════════════
+        # DEBUG OUTPUT
         print("\n" + "="*80)
         print(f"[DEBUG] Query: {query}")
         print(f"[DEBUG] Retrieved {len(retrieved_docs)} documents")
@@ -399,7 +398,7 @@ class RAGPipeline:
             
             # First 200 characters
             preview = doc.page_content[:200].replace('\n', ' ')
-            print(f"    {preview}...")
+            print(f"{preview}...")
             
             # Extract amounts in document
             amounts = re.findall(r'(\d+)\s*(?:€|Euro)', doc.page_content)
@@ -488,10 +487,15 @@ class RAGPipeline:
             if len(extracted_quote) >= 50 and not has_failure:
                 print(f"[QUOTE] Tier 1 success: {len(extracted_quote)} chars")
                 return extracted_quote
-            
+
             print(f"[QUOTE] Tier 2 hardcoded for Task {task_number}")
             self._log_quote_extraction_error(query, task_number, "hardcoded")
-            return content.FALLBACK_QUOTES[task_number]
+
+            # ADD DEFENSIVE CHECK HERE:
+            if task_number and task_number in content.FALLBACK_QUOTES:
+                return content.FALLBACK_QUOTES[task_number]
+            else:
+                return "Es passt kein Zitat zu Ihrer Anfrage. Bitte versuchen Sie es mit spezifischeren Begriffen erneut."
             
         except Exception as e:
             print(f"[QUOTE ERROR] {type(e).__name__}: {e}")
@@ -596,31 +600,6 @@ class RAGPipeline:
         except Exception:
             # If logging fails, print to console
             print(f"[RAG ERROR] {error_type}: {type(exception).__name__}")
-
-
-    def _log_quote_extraction_error(self, query, exception):
-        """
-        Log quote extraction failures specifically.
-        
-        These are non-critical but important for thesis analysis of
-        augmented condition performance.
-        
-        Args:
-            query: User query
-            exception: Exception object
-        """
-        try:
-            if hasattr(st.session_state, 'session_id'):
-                log_interaction(
-                    session_id=st.session_state.session_id,
-                    task_number=st.session_state.get('task_number', -1),
-                    event_type="quote_extraction_failure",
-                    details=f"Query: {query[:100]} | Error: {type(exception).__name__}"
-                )
-            
-            print(f"[QUOTE EXTRACTION FAILED] {type(exception).__name__}: {str(exception)}")
-        except Exception:
-            pass  # Silently fail if logging impossible
 
 
     def _create_error_response(self, message, recoverable=True):
@@ -802,51 +781,3 @@ class RAGPipeline:
                 )
         except Exception:
             pass  # Silent fail if logging impossible
-
-
-    def _find_best_matching_absatz(self, answer_text, document_text):
-        """
-        Find which Absatz in document best matches answer content.
-        
-        Uses keyword overlap scoring (adapted from CiteFix approach).
-        Splits document into numbered subsections like "(1)", "(2)", "(9)",
-        tokenizes both answer and each subsection, then calculates which
-        subsection has the most overlapping words with the answer.
-        
-        Args:
-            answer_text: Generated answer text
-            document_text: Full source document
-        
-        Returns:
-            Absatz number (string) or None if no match found
-        """
-        # Split document into Absätze (German legal structure: "(1)", "(2)", etc.)
-        absatz_pattern = r'\((\d+)\)\s+(.*?)(?=\n\(|\Z)'
-        absaetze = re.findall(absatz_pattern, document_text, re.DOTALL)
-        
-        if not absaetze:
-            return None
-        
-        # Tokenize answer (extract words)
-        answer_tokens = set(re.findall(r'\b\w+\b', answer_text.lower()))
-        
-        # Score each Absatz based on keyword overlap
-        best_absatz_num = None
-        max_score = 0
-        
-        for absatz_num, absatz_text in absaetze:
-            absatz_tokens = set(re.findall(r'\b\w+\b', absatz_text.lower()))
-            
-            # Calculate overlap score (CiteFix-inspired)
-            overlap = len(answer_tokens & absatz_tokens)
-            score = overlap / len(answer_tokens) if answer_tokens else 0
-            
-            if score > max_score:
-                max_score = score
-                best_absatz_num = absatz_num
-        
-        if max_score > 0:
-            print(f"[Absatz Matching] Best match: Abs. {best_absatz_num} (score: {max_score:.3f})")
-            return best_absatz_num
-        else:
-            return None

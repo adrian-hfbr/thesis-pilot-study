@@ -26,12 +26,7 @@ from utils import log_interaction
 
 
 def render_task_header(task):
-    """
-    Renders the task header with scenario, question, and instructions.
-    
-    Args:
-        task: Task dictionary from content.TASKS containing name, scenario, question
-    """
+    """Display task name, scenario description, and instructions with copy-protection on header text."""
     with st.container(border=True):
         # CSS to prevent text selection in this container
         st.markdown("""
@@ -65,18 +60,7 @@ def render_task_header(task):
 
 
 def render_augmented_buttons(doc, legal_ref, url, message_index, task_number, quote, show_source_modal_callback):
-    """
-    Renders quote expander and modal button for Augmented condition.
-    
-    Args:
-        doc: Document object with metadata
-        legal_ref: Legal reference string
-        url: Source URL
-        message_index: Index of the message in the message list (used for unique keys)
-        task_number: Current task number
-        quote: Quote text to display
-        show_source_modal_callback: Callback function to open modal
-    """
+    """Render expandable quote button and full-text modal button for Augmented condition with dwell tracking."""
     quote_visible_key = f"quote_visible_{message_index}"
     
     # Initialize visibility state
@@ -139,17 +123,7 @@ def render_augmented_buttons(doc, legal_ref, url, message_index, task_number, qu
 
 
 def render_minimal_buttons(doc, legal_ref, url, message_index, task_number, show_source_modal_callback):
-    """
-    Renders modal button for Minimal condition (no quote expander).
-    
-    Args:
-        doc: Document object with metadata
-        legal_ref: Legal reference string
-        url: Source URL
-        message_index: Index of the message in the message list (used for unique keys)
-        task_number: Current task number
-        show_source_modal_callback: Callback function to open modal
-    """
+    """Render full-text modal button only for Minimal condition without inline quote display."""
     modal_button_key = f"btn_modal_min_{message_index}"
     if st.button("Gesetzestext anzeigen", key=modal_button_key, use_container_width=True):
         finalize_open_quotes()
@@ -169,14 +143,7 @@ def render_minimal_buttons(doc, legal_ref, url, message_index, task_number, show
 
 
 def render_message_list(messages, task_number, show_source_modal_callback):
-    """
-    Renders all messages in the chat, including buttons for the last assistant message.
-    
-    Args:
-        messages: List of message dictionaries with 'role', 'content', 'context', etc.
-        task_number: Current task number
-        show_source_modal_callback: Callback function to open modal
-    """
+    """Render all chat messages and verification buttons (expander/modal) only on the last assistant response."""
     if 'button_clicks_processed' not in st.session_state:
         st.session_state.button_clicks_processed = set()
 
@@ -223,20 +190,12 @@ def render_message_list(messages, task_number, show_source_modal_callback):
 
 
 def _validate_user_input(user_query):
-    """
-    Validates and sanitizes user input before RAG processing.
-        
-    Args:
-        user_query: Raw user input string
-        
-    Returns:
-        tuple: (is_valid: bool, sanitized_query: str, error_message: str)
-    """
+    """Validate query length (1-500 characters) and return sanitized input or error message."""
     # Sanitize: strip whitespace
     sanitized = user_query.strip()
     
     # Check
-    if len(sanitized) == 0 or len(sanitized) < 3 or len(sanitized) > 500:
+    if len(sanitized) < 1 or len(sanitized) > 500:
         return False, "", "Bitte geben Sie die Frage erneut ein und achten Sie auf die Länge."
     
     # All checks passed
@@ -244,18 +203,7 @@ def _validate_user_input(user_query):
 
 
 def handle_user_input(user_input, task_number, history_key, pipeline):
-    """
-    Handles user input: logs interaction, calls RAG pipeline, updates state.
-    
-    MODIFIED: Added input validation (Fix #2: Chat Input Validation)
-    
-    Args:
-        user_input: User's query string
-        task_number: Current task number
-        history_key: Session state key for chat history (e.g., "task_1_history")
-        pipeline: RAG pipeline instance for generating responses
-    """
-
+    """Process user query: validate, log, invoke RAG pipeline, track follow-ups, and update chat history."""
     is_valid, sanitized_query, error_message = _validate_user_input(user_input)
     
     if not is_valid:

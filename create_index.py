@@ -25,12 +25,7 @@ load_dotenv()
 
 
 def parse_legal_reference(filename):
-    """
-    Extracts clean legal reference from filename.
-    Examples: 
-    - "estg_35a.txt" → "EStG §35a"
-    - "ustg_4.txt" → "UStG §4"
-    """
+    """Extract German tax law reference from filename (e.g., 'estg_35a.txt' → 'EStG §35a')."""
     # Extract law name and paragraph
     match = re.search(r'(estg|ustg|abgb)_(\d+[a-z]?)', filename.lower())
     if match:
@@ -41,10 +36,7 @@ def parse_legal_reference(filename):
 
 
 def extract_paragraph_details(text_content):
-    """
-    Attempts to extract Absatz information from document text.
-    Example: "(1) Für haushaltsnahe..." → "Abs. 1"
-    """
+    """Extract Absatz (subsection) information from document text (e.g., '(1) Für...' → 'Abs. 1')."""
     # Look for "(1)" or "(2)" at start of text
     abs_match = re.search(r'^\((\d+[a-z]?)\)', text_content.strip())
     if abs_match:
@@ -53,25 +45,8 @@ def extract_paragraph_details(text_content):
 
 
 def load_and_enrich_documents(data_path):
-    """
-    Load German tax law documents and enrich with structured metadata.
-    
-    Args:
-        data_path (str): Directory path containing .txt source documents
-        
-    Returns:
-        list: List of LangChain Document objects with enriched metadata:
-            - url: Official gesetze-im-internet.de source URL
-            - legal_reference: Short form (e.g., "EStG §35a")
-            - legal_reference_full: Full form including Absatz (e.g., "EStG §35a Abs. 2")
-            - source_file: Original filename
-            - paragraph_detail: Extracted Absatz (e.g., "Abs. 2")
-    
-    Raises:
-        SystemExit: If no valid documents found
-    """
+    """Load German tax law documents and enrich with structured metadata including URLs and legal references."""
     print(f"Loading documents from: {data_path}")
-    
     # URL mapping for source attribution to official federal legal database
     source_url_mapping = {
         "estg_6.txt": "https://www.gesetze-im-internet.de/estg/__6.html",
@@ -126,20 +101,7 @@ def load_and_enrich_documents(data_path):
 
 
 def chunk_documents(documents):
-    """
-    Split documents into 800-character chunks using hierarchical text splitting.
-    
-    Args:
-        documents (list): List of LangChain Document objects with metadata
-        
-    Returns:
-        list: List of chunked Document objects (metadata preserved from parent documents)
-        
-    Implementation Details:
-        - Chunk size: 800 characters
-        - Overlap: 50 characters (prevents boundary information loss)
-        - Separators: Hierarchical [\n\n, \n, ., !, ?, ' ', ''] respects semantic units
-    """
+    """Split documents into 800-character chunks with 50-character overlap using hierarchical separators."""
     print(f"Splitting documents into chunks (size: {config.CHUNK_SIZE} chars, overlap: {config.CHUNK_OVERLAP} chars)...")
     
     text_splitter = RecursiveCharacterTextSplitter(
@@ -156,17 +118,7 @@ def chunk_documents(documents):
 
 
 def create_and_save_vectorstore(chunked_documents, vectorstore_path):
-    """
-    Generate embeddings and build FAISS vectorstore with IndexFlatL2.
-    
-    Args:
-        chunked_documents (list): List of chunked Document objects
-        vectorstore_path (str): Disk path for saving FAISS index
-        
-    Returns:
-        FAISS: Built and persisted vectorstore object
-    
-    """
+    """Generate OpenAI embeddings and persist FAISS IndexFlatL2 vectorstore to disk."""
     print(f"Generating embeddings using {config.EMBEDDING_MODEL}...")
     
     # Initialize OpenAI embeddings
@@ -188,19 +140,7 @@ def create_and_save_vectorstore(chunked_documents, vectorstore_path):
 
 
 def build_and_save_index():
-    """
-    Orchestrates the complete indexing pipeline for single-scale RAG architecture.
-    
-    Pipeline Steps:
-        1. Load documents with metadata enrichment (URLs, legal references)
-        2. Split into 800-character chunks using RecursiveCharacterTextSplitter
-        3. Generate embeddings using OpenAI text-embedding-3-small
-        4. Build FAISS IndexFlatL2 vector store
-        5. Save to disk for runtime loading
-    
-    Raises:
-        SystemExit: If document loading fails
-    """
+    """Orchestrate complete offline indexing pipeline: load, chunk, embed, and persist FAISS index."""
     print("=" * 60)
     print("Starting Index Creation (Single-Scale Retrieval)")
     print("=" * 60)

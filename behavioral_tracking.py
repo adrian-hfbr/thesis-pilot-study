@@ -20,7 +20,7 @@ def update_last_action_time():
 
 
 def finalize_open_quotes():
-    """Auto-close all open quotes and log their dwell times - ONCE only."""
+    """Auto-close all open expanders, calculate dwell times, and log quote interactions meeting minimum threshold."""
     now = datetime.now()
     keys_to_delete = []
     
@@ -64,6 +64,7 @@ def finalize_open_quotes():
             del st.session_state[key]
 
 def track_quote_toggle(quote_key, is_opening, task_number, legal_ref, url):
+    """Track expander open/close events, measure dwell time, and record first-click latency after answer."""
     visible_key = f"quote_visible_{quote_key}"
     timestamp_key = f"quote_timestamp_{quote_key}"
     
@@ -120,6 +121,7 @@ def track_quote_toggle(quote_key, is_opening, task_number, legal_ref, url):
         st.session_state[visible_key] = False
 
 def finalize_modal_tracking(doc):
+    """Log modal dwell time and interaction metrics, filtering by minimum threshold and study condition."""
     if st.session_state.modal_opened_time:
         dwell_time = (datetime.now() - st.session_state.modal_opened_time).total_seconds()
         legal_ref_clean = doc.metadata.get("legal_reference", "Unknown")
@@ -157,10 +159,7 @@ def finalize_modal_tracking(doc):
 
 
 def track_modal_button_click():
-    """
-    Tracks when the modal button is clicked, handling first click timing
-    and clicks after follow-ups.
-    """
+    """Track modal button clicks, count escalations from expanders, and measure first-click latency."""
     st.session_state.modal_clicks_total += 1
     
     if st.session_state.last_expander_click_time is not None:
@@ -183,12 +182,7 @@ def track_modal_button_click():
 
 
 def calculate_final_metrics():
-    """
-    Calculates final behavioral metrics for task completion.
-    
-    Returns:
-        dict: Dictionary with mean_answer_reading and answer_finalization_time
-    """
+    """Compute mean answer reading time and time-to-submit for multiple choice screen."""
     # Calculate mean answer reading time
     mean_answer_reading = 0
     if st.session_state.answer_reading_times:

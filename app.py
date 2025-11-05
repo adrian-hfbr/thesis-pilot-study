@@ -163,12 +163,14 @@ def initialize_session_state():
 initialize_session_state()
 
 def create_postsurvey_page1():
+    """Construct post-study survey page 1 dictionary with manipulation check questions."""
     return {
         'title': 'Fragebogen nach der Studie - Teil 1 von 3',
         'manipulation_check': content.POST_STUDY_SURVEY['manipulation_check']
     }
 
 def create_postsurvey_page2():
+    """Construct post-study survey page 2 dictionary with cognitive load items (ICL, ECL, GCL) and attention checks."""
     return {
         'title': 'Fragebogen nach der Studie - Teil 2 von 3',
         'icl_items': content.POST_STUDY_SURVEY['icl_items'],
@@ -178,6 +180,7 @@ def create_postsurvey_page2():
     }
 
 def create_postsurvey_page3():
+    """Construct post-study survey page 3 dictionary with trust and system reliability items."""
     return {
         'title': 'Fragebogen nach der Studie - Teil 3 von 3',
         'trust_items': content.POST_STUDY_SURVEY['trust_items'],
@@ -187,12 +190,13 @@ def create_postsurvey_page3():
 # --- Modal for Source Verification ---
 @st.dialog("Quelle", width="large")
 def show_source_modal():
+    """Display full source document text in a modal dialog with dwell time tracking."""
     doc = st.session_state.get("modal_doc")
     if not doc:
         st.warning("Keine Quelle zum Anzeigen ausgewählt.")
         if st.button("Schließen"):
             st.session_state.modal_doc = None
-            # NEW: Clear all modal button guards so they can be clicked again
+            # Clear all modal button guards so they can be clicked again
             if 'button_clicks_processed' in st.session_state:
                 keys_to_remove = [k for k in st.session_state.button_clicks_processed 
                                 if k.startswith('btn_modal_')]
@@ -250,6 +254,7 @@ def show_source_modal():
 
 # --- Screen Rendering Functions ---
 def render_consent():
+    """Display informed consent form and advance to instructions upon agreement."""
     st.header("Einverständniserklärung")
     st.markdown(content.CONSENT_TEXT)
     
@@ -259,6 +264,7 @@ def render_consent():
 
 
 def render_instructions_and_comprehension():
+    """Display condition-specific instructions with screenshots and validate comprehension via quiz questions."""
     group = st.session_state.group  # "Augmented" or "Minimal"
     st.header("Anleitung")
     
@@ -330,6 +336,7 @@ def render_instructions_and_comprehension():
 
 
 def render_survey(surveydict, next_step):
+    """Render survey pages (Likert scales, manipulation checks, cognitive load, trust) with interaction tracking and validation."""
     st.header(surveydict["title"])
     responses = {}
 
@@ -513,7 +520,7 @@ def render_survey(surveydict, next_step):
                 # Backup
                 from backup_manager import backup_participant_data
                 prolific_pid = st.session_state.get('prolific_pid', 'UNKNOWN')
-                backup_participant_data(st.session_state.session_id, prolific_pid)
+                backup_participant_data(st.session_state.session_id)
                 
                 st.session_state.current_step = next_step  # → debriefing
                 st.rerun()
@@ -521,10 +528,7 @@ def render_survey(surveydict, next_step):
 
 
 def render_chat():
-    """
-    Main chat/task interface rendering function.
-    Now uses extracted task_renderer functions for better modularity.
-    """
+    """Render main task interface with AI assistant chat, quote/modal buttons, and interaction logging."""
     if "modal_was_open" not in st.session_state:
         st.session_state.modal_was_open = False
     
@@ -601,6 +605,7 @@ def render_chat():
 
 
 def render_task_post():
+    """Render answer selection screen for multiple choice task with confidence rating and behavioral metrics logging."""
     task = content.TASKS[st.session_state.task_number]
     
     st.markdown(f"""
@@ -779,6 +784,7 @@ def render_task_post():
         st.session_state.answer_logged = False
 
 def render_debriefing():
+    """Display debriefing message and Prolific completion link for study closure."""
     st.header("Vielen Dank für Ihre Teilnahme!")
     try:
         st.balloons()

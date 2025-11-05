@@ -1,45 +1,4 @@
 # utils.py 
-"""
-Data Logging Utilities for RAG-Based Tax Advisor Experiment
-
-This module handles all CSV-based data logging for the experimental study investigating
-the impact of justification explanation design on cognitive load, trust, and reliance
-in a RAG-based tax advisory system.
-
-Architecture:
-    Four separate CSV log files track different aspects of participant behavior:
-    
-    1. participants.csv: Demographics, experimental condition assignment, and control
-       variables (tech affinity, chatbot experience, tax knowledge, task complexity)
-    
-    2. tasks.csv: Task-level performance metrics and behavioral verification indicators
-       including click counts, dwell times, and self-reported reliance
-    
-    3. interactions.csv: Fine-grained event-level logging with timestamps for all
-       user actions (questions, clicks, modal/expander interactions)
-    
-    4. post_survey.csv: Post-study questionnaire responses measuring cognitive load
-       (ICL, ECL, GCL), trust dimensions (functionality, helpfulness, reliability),
-       and manipulation check validation
-
-Design Rationale:
-    - CSV format chosen for simplicity, human-readability, and pandas integration
-    - Session IDs (UUID v4) ensure participant anonymity while enabling data linkage
-    - Append-only operations minimize data loss risk during experimental sessions
-    - Separate files prevent data corruption if one log fails
-
-Production Enhancements:
-    - File locking prevents concurrent write conflicts in multi-user environment
-    - Write verification ensures data integrity before proceeding
-    - Prolific PID validation prevents invalid submissions
-    - Robust directory creation with permission checks
-
-Dependencies:
-    - pandas: CSV read/write operations
-    - streamlit: Error display to participants
-    - config.py: Dwell time thresholds (MINIMUM_DWELL_TIME_MODAL = 3s, 
-                 MINIMUM_DWELL_TIME_EXPANDER = 1s)
-"""
 
 import os
 import pandas as pd
@@ -66,34 +25,7 @@ POST_SURVEY_ERROR_LOG = os.path.join(LOG_DIR, "post_survey_error.csv")
 # FILE LOCKING FOR CONCURRENT CSV WRITES
 @contextmanager
 def file_lock_context(filepath, timeout=10):
-    """
-    Context manager for safe concurrent CSV file access using lock files.
-    
-    This prevents race conditions when multiple Streamlit sessions (Prolific participants)
-    write to the same CSV file simultaneously. Uses a simple lock file mechanism
-    compatible with Streamlit Community Cloud (Linux-based).
-    
-    Args:
-        filepath: Path to the CSV file to protect
-        timeout: Maximum seconds to wait for lock acquisition (default: 10s)
-    
-    Yields:
-        None: Control flow within the locked context
-    
-    Raises:
-        TimeoutError: If lock cannot be acquired within timeout period
-        
-    Design:
-        - Lock file named <filepath>.lock created atomically
-        - Exponential backoff (10ms increments) reduces contention
-        - Automatic cleanup in finally block ensures locks don't persist
-        - Compatible with network filesystems used by Streamlit Cloud
-        
-    Example:
-        with file_lock_context(TASKS_LOG):
-            # Safe to write to CSV here - exclusive access guaranteed
-            pd.DataFrame([entry]).to_csv(TASKS_LOG, mode='a', header=False, index=False)
-    """
+    """Context manager using atomic lock files to safely handle concurrent CSV writes across multiple Streamlit sessions."""
     lock_file = f"{filepath}.lock"
     start_time = time.time()
     lock_fd = None
@@ -126,16 +58,7 @@ def file_lock_context(filepath, timeout=10):
 
 
 def _log_system_error(error_type, details):
-    """
-    Internal helper to log system-level errors without disrupting participant flow.
-    
-    Writes to a separate error log file instead of crashing the application.
-    This function never raises exceptions.
-    
-    Args:
-        error_type: Short error identifier (e.g., "file_lock_timeout", "csv_write_failure")
-        details: Detailed error message for debugging
-    """
+    """Log non-critical system errors to system_errors.log without disrupting participant flow."""
     try:
         error_log_path = os.path.join(LOG_DIR, "system_errors.log")
         with open(error_log_path, "a", encoding='utf-8') as f:
@@ -149,34 +72,7 @@ def _log_system_error(error_type, details):
 
 # ROBUST DIRECTORY CREATION WITH VALIDATION
 def initialize_log_files():
-    """
-    Creates the log directory and initializes all CSV files with correct headers.
-    
-    This function is idempotent - safe to call multiple times. It only creates
-    files if they don't already exist, preserving any existing logged data.
-    Called once at application startup in app.py.
-    
-    File Schemas:
-        participants.csv: 8 columns (session metadata + control variables)
-        tasks.csv: 17 columns (performance + behavioral verification metrics)
-        interactions.csv: 6 columns (fine-grained event logging)
-        post_survey.csv: 22 columns (cognitive load + trust + manipulation check)
-    
-    Production Enhancements:
-        - Validates write permissions before proceeding
-        - Shows user-friendly error messages if filesystem access fails
-        - Stops execution gracefully if critical logging infrastructure unavailable
-    
-    Raises:
-        Calls st.stop() if directory creation or file writing fails
-        
-    FUNCTIONAL EQUIVALENCE:
-        - Same os.makedirs(LOG_DIR, exist_ok=True) call
-        - Same CSV schemas (column names, order, data types)
-        - Same idempotent behavior (no-op if files exist)
-        - Additional: Permission validation test
-        - Additional: Error handling with st.error() + st.stop()
-    """
+    """Create logs directory and initialize all four CSV files (participants, tasks, interactions, post_survey) with proper headers."""
     # STEP 1: Create directory (UNCHANGED from original)
     try:
         os.makedirs(LOG_DIR, exist_ok=True)
@@ -300,9 +196,7 @@ def initialize_log_files():
 
 # PROLIFIC PID VALIDATION IN SESSION ID GENERATION
 def get_session_id():
-    """
-    Retrieves or generates a unique session identifier for the current participant.
-    """
+    """Retrieve or generate a unique UUID v4 session identifier for participant anonymization."""
     if 'session_id' not in st.session_state:
         # Generate new session ID (UNCHANGED from original)
         st.session_state['session_id'] = str(uuid.uuid4())
@@ -310,44 +204,8 @@ def get_session_id():
     return st.session_state['session_id']
 
 
-
-# ============================================================================
-# FEATURE 4: CONCURRENT-SAFE LOGGING WITH WRITE VERIFICATION
-# ============================================================================
-# REASONING: Original logging functions used pd.DataFrame.to_csv(mode='a') without
-# any concurrency protection or write verification. The refactored versions wrap
-# the EXACT SAME write operations in file locks and add verification.
-# 
-# CRITICAL: The data being written, column order, and CSV format are UNCHANGED.
-# Only the write operation itself is protected.
-# ============================================================================
-
 def log_participant_info(session_id, study_id, prolific_session_id, prolific_pid, group, survey_responses, total_duration=None):
-    """
-    Logs participant demographic data and experimental condition assignment.
-    
-    Called once at the end of the pre-study survey. The total_duration field
-    is initially None and updated at experiment completion.
-    
-    Production Enhancement:
-        - File locking prevents concurrent write conflicts
-        - Write verification ensures data actually saved to disk
-        - Graceful error handling prevents participant disruption
-    
-    Args:
-        session_id: UUID v4 participant identifier (UNCHANGED)
-        prolific_pid: Prolific ID for payment (UNCHANGED)
-        group: "Augmented" or "Minimal" (UNCHANGED)
-        survey_responses: Dict with tech_affinity, chatbot_experience, tax_knowledge (UNCHANGED)
-        total_duration: Experiment duration in seconds (UNCHANGED)
-        
-    FUNCTIONAL EQUIVALENCE:
-        - Same new_entry dict structure (UNCHANGED)
-        - Same column order in CSV (UNCHANGED)
-        - Same pd.DataFrame([new_entry]).to_csv() call (UNCHANGED)
-        - Additional: Wrapped in file_lock_context()
-        - Additional: Write verification after save
-    """
+    """Log participant data, experimental condition, and pre-study survey responses with concurrent-safe file locking and write verification."""
     max_retries = 4
     for attempt in range(max_retries):
         try:
@@ -421,29 +279,7 @@ def log_task_data(session_id, task_number, post_answer, confidence,
                   first_click_latency=None, clicks_after_followups=0,
                   prompts_before_first_verification=None,
                   expander_then_modal_escalations=0):
-    """
-    Logs comprehensive task-level performance and behavioral verification metrics.
-    
-    This function captures the complete behavioral trace for a single task,
-    including both outcome measures (answer correctness, confidence) and process
-    measures (verification behavior, temporal patterns).
-    
-    Production Enhancement:
-        - File locking prevents concurrent write conflicts
-        - Critical data write verified before proceeding
-        - Stops execution on failure (task data is critical for thesis)
-    
-    Args:
-        All parameters UNCHANGED from original function signature
-        
-    FUNCTIONAL EQUIVALENCE:
-        - Same new_entry dict structure (UNCHANGED)
-        - Same column order in CSV (UNCHANGED)
-        - Same rounding logic: round(..., 1) (UNCHANGED)
-        - Same pd.DataFrame([new_entry]).to_csv() call (UNCHANGED)
-        - Additional: Wrapped in file_lock_context()
-        - Additional: Write verification (stops on failure)
-    """
+    """Log comprehensive task-level performance and behavioral metrics with retry logic and fallback error handling."""
     max_retries = 4
     for attempt in range(max_retries):
         try:
@@ -525,29 +361,7 @@ def log_task_data(session_id, task_number, post_answer, confidence,
 
 
 def log_interaction(session_id, task_number, event_type, details, selected_answer=None, dwell_time=None):
-    """
-    Logs individual interaction events with precise timestamps for process mining.
-    
-    Production Enhancement:
-        - File locking prevents concurrent write conflicts
-        - Graceful error handling (interactions are less critical than task data)
-        - Multiple retry attempts before showing warning
-    
-    Args:
-        session_id: UUID v4 participant identifier
-        task_number: Current task number
-        event_type: Type of event (e.g., 'quote_opened', 'ai_response')
-        details: Event details (now includes AI response text for ai_response events)
-        selected_answer: Multiple choice selection (optional)
-        dwell_time: Time spent in seconds (optional, for verification events)
-        
-    Changes from previous version:
-        - Removed ai_response_text parameter
-        - Added dwell_time parameter
-        - AI responses now go directly in details column
-        - Dwell time tracked in separate numeric column
-    """
-
+    """Log fine-grained interaction events with timestamps for process mining and behavioral analysis."""
     max_retries = 4
     for attempt in range(max_retries):
         try:
@@ -614,31 +428,7 @@ def log_interaction(session_id, task_number, event_type, details, selected_answe
                 # No st.stop() - continue silently for interactions
 
 def log_post_survey(session_id, survey_responses, manip_check_correct=None, total_duration=None):
-    """
-    Logs post-study questionnaire responses including cognitive load, trust, and
-    manipulation check validation.
-    
-    This function captures the attitudinal outcomes of the experiment, including
-    three dimensions of cognitive load (intrinsic, extraneous, germane), three
-    dimensions of trust (functionality, helpfulness, reliability), and validation
-    that participants correctly perceived their experimental condition.
-    
-    Production Enhancement:
-        - File locking prevents concurrent write conflicts
-        - Write verification ensures critical survey data saved
-        - Stops execution on failure (survey data critical for thesis hypotheses)
-    
-    Args:
-        All parameters UNCHANGED from original function signature
-        
-    FUNCTIONAL EQUIVALENCE:
-        - Same new_entry dict construction (UNCHANGED)
-        - Same key ordering matching CSV headers (UNCHANGED)
-        - Same survey_responses.get(key) pattern (UNCHANGED)
-        - Same pd.DataFrame([new_entry]).to_csv() call (UNCHANGED)
-        - Additional: Wrapped in file_lock_context()
-        - Additional: Write verification (stops on failure)
-    """
+    """Log post-study survey responses (cognitive load, trust, manipulation check) with write verification and fallback error logging."""
     max_retries = 4
     for attempt in range(max_retries):
         try:

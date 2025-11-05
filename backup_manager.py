@@ -10,14 +10,13 @@ import os
 from datetime import datetime
 from io import BytesIO
 
+@st.cache_resource
 def get_s3_client():
-    """
-    Initialize AWS S3 client with access keys (simple, never expires).
-    Cached to avoid recreating connection on every call.
-    """
+    """Initialize and return AWS S3 client and bucket name; gracefully fallback to None on credential/connectivity errors."""
     try:
         import boto3
         from botocore.exceptions import ClientError, NoCredentialsError
+        from botocore.config import Config
         
         # Get credentials from Streamlit secrets
         access_key = st.secrets["AWS_ACCESS_KEY_ID"]
@@ -25,12 +24,19 @@ def get_s3_client():
         bucket_name = st.secrets["S3_BUCKET_NAME"]
         region = st.secrets.get("AWS_REGION", "eu-central-1")
         
+        s3_config = Config(
+        connect_timeout=10,           # 10 seconds to establish connection
+        read_timeout=30,              # 30 seconds for read operations
+        retries={'max_attempts': 2}   # Retry failed uploads twice
+        )
+
         # Create S3 client (no token refresh needed - keys never expire)
         s3_client = boto3.client(
             's3',
             aws_access_key_id=access_key,
             aws_secret_access_key=secret_key,
-            region_name=region
+            region_name=region,
+            config=s3_config
         )
         
         # Test connection with a simple operation
@@ -58,10 +64,8 @@ def get_s3_client():
         st.warning(f"Unerwarteter Fehler: {e}. Daten sind lokal gespeichert.")
         return None, None
 
-def backup_participant_data(session_id, prolific_pid):
-    """
-    Backup all CSV data + error files for one participant to S3 immediately after completion.
-    """
+def backup_participant_data(session_id):
+    """Back up participant's session data to S3 by filtering and uploading relevant CSV rows after study completion."""
     s3_client, bucket_name = get_s3_client()
     if not s3_client:
         return False
@@ -111,12 +115,17 @@ def backup_participant_data(session_id, prolific_pid):
                 participant_df.to_csv(csv_buffer, index=False)
                 csv_buffer.seek(0)
                 
-                s3_client.upload_fileobj(
-                    csv_buffer,
-                    bucket_name,
-                    s3_key,
-                    ExtraArgs={'ContentType': 'text/csv'}
-                )
+                try:
+                    s3_client.upload_fileobj(
+                        csv_buffer,
+                        bucket_name,
+                        s3_key,
+                        ExtraArgs={'ContentType': 'text/csv'}
+                    )
+                except Exception as e:
+                    if 'Timeout' in str(e):
+                        st.error(f"S3 upload timeout for {csv_file}. Data saved locally.")
+                    continue
             
             backup_count += 1
             

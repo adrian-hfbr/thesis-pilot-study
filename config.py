@@ -9,7 +9,7 @@ LOG_FILE = "logs/interaction_log.csv"
 EMBEDDING_MODEL = "text-embedding-3-small"
 LLM_MODEL = "gpt-4o" #"gpt-4o-mini"
 
-MINIMUM_DWELL_TIME_MODAL = 3  # seconds
+MINIMUM_DWELL_TIME_MODAL = 4  # seconds
 MINIMUM_DWELL_TIME_EXPANDER = 1 # second
 
 # RAG-Configuration - Single-scale retrieval 
@@ -39,13 +39,4 @@ LIKERT_LABELS_CONF = {
     5: "5 - Ich bin mir eher sicher.",
     6: "6 - Ich bin mir sicher.",
     7: "7 – Ich bin mir sehr sicher.",
-}
-
-LIKERT_LABELS_6 = {
-    1: "1 – stimmt gar nicht",
-    2: "2 - stimmt weitgehend nicht",
-    3: "3 - stimmt eher nicht",
-    4: "4 - stimmt eher",
-    5: "5 - stimmt weitgehend",
-    6: "6 – stimmt völlig",
 }
