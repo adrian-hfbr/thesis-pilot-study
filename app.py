@@ -11,7 +11,6 @@ from rag_pipeline import RAGPipeline as _RAG
 from ui_components import (
     likert_select,
     likert_select_conf,
-    likert_select_6,
     format_legal_text
 )
 from behavioral_tracking import (
@@ -28,8 +27,15 @@ from task_renderer import (
     handle_user_input
 )
 
-from utils import get_session_id, initialize_log_files, log_participant_info, log_task_data, log_interaction, log_post_survey
-
+from utils import (
+    get_session_id,
+    initialize_log_files,
+    log_participant_info,
+    log_task_data,
+    log_interaction,
+    log_post_survey,
+    check_all_tasks_correct
+)
 
 # --- Application Setup ---
 warnings.filterwarnings("ignore", category=UserWarning, message=".*verbose.*")
@@ -800,9 +806,16 @@ def render_debriefing():
     st.markdown("### Studie abschließen")
     st.info("**Wichtig:** Klicken Sie auf den Button unten, um Ihre Teilnahme auf Prolific zu bestätigen und Ihre Vergütung zu erhalten.")
     
-    # Get Prolific completion URL
-    PROLIFIC_COMPLETION_CODE = "XYZXYZXYZ"
-    completion_url = f"https://app.prolific.com/submissions/complete?cc={PROLIFIC_COMPLETION_CODE}"
+    # Check if all tasks were answered correctly
+    all_correct = check_all_tasks_correct(st.session_state.session_id)
+    
+    # Set completion code based on performance
+    if all_correct:
+        PROLIFICCOMPLETIONCODE = 'PERFECTSCORE'  # Replace with your actual bonus code
+    else:
+        PROLIFICCOMPLETIONCODE = 'XYZXYZXYZ'  # Standard completion code
+    
+    completion_url = f"https://app.prolific.com/submissions/complete?cc={PROLIFICCOMPLETIONCODE}"
     
     # Create a clickable button-style link
     st.markdown(
@@ -829,7 +842,7 @@ def render_debriefing():
         unsafe_allow_html=True
     )
     
-    st.caption("Nach dem Klick werden Sie zu Prolific weitergeleitet. Sie können dieses Fenster dann schließen.")
+    st.caption("Nach dem Klick werden Sie zu Prolific weitergeleitet. Im Anschluss können Sie das Fenster schließen.")
 
 
 

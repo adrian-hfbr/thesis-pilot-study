@@ -160,7 +160,8 @@ COMPREHENSION_BY_CONDITION = {
 PRE_STUDY_SURVEY = {
     "title": "Fragebogen vor der Studie",
     "items": {
-         # ATI Short-Scale (4 items) - 6-point scale
+        "task_completion_thoroughness": "Ich bin jemand, der beharrlich ist und an Aufgaben arbeitet, bis sie fertig sind.",
+         # ATI Short-Scale (4 items)
         "ati_1": "Ich beschäftige mich gern genauer mit technischen Systemen.",
         "ati_2": "Ich probiere gern die Funktionen neuer technischer Systeme aus.",
         "ati_3": "Es genügt mir, dass ein technisches System funktioniert, mir ist es egal, wie oder warum.",
@@ -168,7 +169,7 @@ PRE_STUDY_SURVEY = {
                 
         "chatbot_experience": "Ich nutze KI-Chatbots (wie ChatGPT) häufig.",
         "tax_knowledge": "Ich bin mit alltäglichen steuerlichen Fragestellungen vertraut.",
-    },
+        },
     "ati_items": ["ati_1", "ati_2", "ati_3", "ati_4"]
 }
 
@@ -181,7 +182,7 @@ TASKS = {
         "options": [
             "Ja, der Laptop ist sofort in diesem Wirtschaftsjahr vollständig absetzbar.",
             "Nein, der Laptop muss über die Nutzungsdauer abgeschrieben werden.",
-            "Ja, er ist über den Sammelposten mit der 1.000€-Grenze absetzbar.",
+            "Ja, er ist über den Sammelposten mit der 1.000€-Grenze sofort absetzbar.",
         ],
         "correct_answer": 1
     },

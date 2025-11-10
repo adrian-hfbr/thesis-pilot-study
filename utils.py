@@ -96,6 +96,7 @@ def initialize_log_files():
                 "prolific_pid",         # Prolific participant ID for payment
                 "timestamp",            # ISO 8601 format session start time
                 "experimental_group",   # "Augmented" or "Minimal" condition
+                "task_completion_thoroughness",
                 # ATI Short-Scale (4 items)
                 "ati_1",
                 "ati_2",
@@ -520,3 +521,26 @@ def log_post_survey(session_id, survey_responses, manip_check_correct=None, tota
                     _log_system_error("error_file_write_also_failed", str(fallback_error))
                 
                 st.stop()  # Still stop - survey data is critical
+
+def check_all_tasks_correct(session_id):
+    """
+    Check if all 4 tasks were answered correctly for the given session.
+    Returns True if all tasks are correct, False otherwise.
+    """
+    try:
+        if not os.path.exists(TASKS_LOG):
+            return False
+        
+        df = pd.read_csv(TASKS_LOG)
+        # Filter for this session's tasks
+        session_tasks = df[df['session_id'] == session_id]
+        
+        # Check if we have exactly 4 tasks
+        if len(session_tasks) != 4:
+            return False
+        
+        # Check if all tasks are correct
+        return session_tasks['is_correct'].all()
+    except Exception as e:
+        _log_system_error('all_correct_check_failed', f'Session {session_id}: {str(e)}')
+        return False

@@ -470,7 +470,6 @@ class RAGPipeline:
         task_number = st.session_state.get('task_number', None)
         
         try:
-            # TIER 1: LLM-based extraction
             quote_prompt = content.QUOTE_EXTRACTION_PROMPT.format(
                 user_query=query,
                 answer=answer,
@@ -484,7 +483,7 @@ class RAGPipeline:
             failure_keywords = ["KEINE_EXTRAKTION", "kein direktes Zitat", "nicht gefunden", "Es wurde kein"]
             has_failure = any(kw.lower() in extracted_quote.lower() for kw in failure_keywords)
             
-            if len(extracted_quote) >= 50 and not has_failure:
+            if len(extracted_quote) >= 10 and not has_failure:
                 print(f"[QUOTE] Tier 1 success: {len(extracted_quote)} chars")
                 return extracted_quote
 
