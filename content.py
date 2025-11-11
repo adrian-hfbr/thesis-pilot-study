@@ -2,7 +2,7 @@
 
 CONSENT_TEXT = """
 **Ablauf:**
-Sie werden gebeten, vier aufgabenbezogene Probleme im Bereich des deutschen Steuerrechts mithilfe eines KI-Chatbots zu lösen. Zuvor und danach werden Sie gebeten, einige Fragebögen auszufüllen. Die gesamte Studie dauert voraussichtlich 20-25 Minuten.
+Sie werden gebeten, vier aufgabenbezogene Probleme im Bereich des deutschen Steuerrechts mithilfe eines KI-Chatbots zu lösen. Zuvor und danach werden Sie gebeten, einige Fragebögen auszufüllen.
 
 **Datenschutz:**
 Alle Ihre Antworten werden anonymisiert erfasst. Es werden keine persönlichen Daten erhoben, die eine Identifizierung Ihrer Person ermöglichen. Die gesammelten Daten werden ausschließlich für wissenschaftliche Zwecke verwendet.
