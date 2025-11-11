@@ -471,15 +471,17 @@ def render_survey(surveydict, next_step):
             # ===== SEITE 1 & 2: NUR speichern, dann weiterleiten =====
             if current_page == 1:
                 st.session_state.postsurvey_page1_responses = responses
-                st.session_state.current_step = next_step  # → poststudysurvey_page2
+                st.session_state.postsurvey_page1_completed = True
+                st.session_state.current_step = next_step
                 st.rerun()
-                return  # WICHTIG: Kein Logging!
+                return
             
             elif current_page == 2:
                 st.session_state.postsurvey_page2_responses = responses
-                st.session_state.current_step = next_step  # → poststudysurvey_page3
+                st.session_state.postsurvey_page2_completed = True
+                st.session_state.current_step = next_step
                 st.rerun()
-                return  # WICHTIG: Kein Logging!
+                return
             
             # ===== SEITE 3: Responses speichern + zusammenführen + LOGGING =====
             elif current_page == 3:
@@ -866,8 +868,16 @@ elif step == "task_post":
 elif step == "poststudysurvey_page1":
     render_survey(create_postsurvey_page1(), next_step="poststudysurvey_page2")
 elif step == "poststudysurvey_page2":
+    if not st.session_state.get("postsurvey_page1_completed", False):
+        st.session_state.current_step = "poststudysurvey_page1"
+        st.rerun()
     render_survey(create_postsurvey_page2(), next_step="poststudysurvey_page3")
+    
 elif step == "poststudysurvey_page3":
+    if not st.session_state.get("postsurvey_page1_completed", False) or not st.session_state.get("postsurvey_page2_completed", False):
+        st.session_state.current_step = "poststudysurvey_page1"
+        st.rerun()
     render_survey(create_postsurvey_page3(), next_step="debriefing")
+
 elif step == "debriefing":
     render_debriefing()
