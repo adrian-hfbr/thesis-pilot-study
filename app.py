@@ -541,13 +541,14 @@ def render_chat():
     if st.session_state.modal_was_open and not st.session_state.get("modal_doc"):
         # Modal was open but is now closed without explicit button click
         finalize_modal_if_open()
-        st.session_state.modal_was_open = False
         log_interaction(
             session_id=st.session_state.session_id,
             task_number=st.session_state.task_number,
-            event_type="modal_closed_untracked",
-            details="Modal closed via ESC or outside click (unintended)"
+            event_type="modal_closed_incorrect",
+            details="Modal closed via ESC or outside click"
         )
+        st.session_state.modal_was_open = False
+        st.session_state.modal_opened_time = None
     
     # Track current modal state
     if st.session_state.get("modal_doc"):
