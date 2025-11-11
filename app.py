@@ -840,7 +840,6 @@ def render_debriefing():
     
     st.markdown(content.DEBRIEFING)
     
-    # Add some spacing
     st.markdown("---")
     
     # Prolific completion button
@@ -852,9 +851,9 @@ def render_debriefing():
     
     # Set completion code based on performance
     if all_correct:
-        PROLIFICCOMPLETIONCODE = 'PERFECTSCORE'  # Replace with your actual bonus code
+        PROLIFICCOMPLETIONCODE = 'C1E98YYT' # all correct
     else:
-        PROLIFICCOMPLETIONCODE = 'XYZXYZXYZ'  # Standard completion code
+        PROLIFICCOMPLETIONCODE = 'C9PXAZPH' # at least 1 wrong
     
     completion_url = f"https://app.prolific.com/submissions/complete?cc={PROLIFICCOMPLETIONCODE}"
     
