@@ -775,7 +775,7 @@ class RAGPipeline:
                 log_interaction(
                     session_id=st.session_state.session_id,
                     task_number=task_number or -1,
-                    event_type=f"quote_fallback_{tier_used}",
+                    event_type=f"citation_fallback_{tier_used}",
                     details=f"Query: {query[:80]}"
                 )
         except Exception:

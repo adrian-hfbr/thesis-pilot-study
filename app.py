@@ -774,6 +774,7 @@ def render_task_post():
                 st.session_state.expander_clicks_verification = 0
                 st.session_state.modal_clicks_verification = 0            
                 st.session_state.prompts_before_first_verification = None
+                st.session_state.first_verification_occurred = False
                 st.session_state.expander_then_modal_escalations = 0
                 st.session_state.last_expander_click_time = None
 
