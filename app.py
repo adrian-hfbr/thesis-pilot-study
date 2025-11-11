@@ -160,6 +160,18 @@ def initialize_session_state():
         st.session_state.postsurvey_page3_responses = {}  # Trust
         st.session_state.current_postsurvey_page = 1
 
+        # Step completion tracking - ADD THIS SECTION
+        st.session_state.consent_completed = False
+        st.session_state.instructions_completed = False
+        st.session_state.pre_study_completed = False
+        st.session_state.task_1_completed = False
+        st.session_state.task_2_completed = False
+        st.session_state.task_3_completed = False
+        st.session_state.task_4_completed = False
+        st.session_state.postsurvey_page1_completed = False
+        st.session_state.postsurvey_page2_completed = False
+        st.session_state.postsurvey_page3_completed = False
+
 
         # Initialize task-scoped histories
         for task_num in range(1, 5):  # You have 4 tasks
@@ -265,6 +277,7 @@ def render_consent():
     st.markdown(content.CONSENT_TEXT)
     
     if st.button("Ich stimme zu und möchte fortfahren"):
+        st.session_state.consent_completed = True
         st.session_state.current_step = "instructions"
         st.rerun()
 
@@ -334,6 +347,7 @@ def render_instructions_and_comprehension():
     with cols[0]:
         if st.button("Weiter"):
             if all_correct:
+                st.session_state.instructions_completed = True
                 st.session_state.current_step = "pre_study_survey"
                 st.rerun()
             else:
@@ -464,6 +478,7 @@ def render_survey(surveydict, next_step):
                 total_duration=None  # Not finished yet
             )
             st.session_state.current_step = next_step
+            st.session_state.pre_study_completed = True  # ADD THIS
             st.rerun()
         
         # Post-study survey - UNTERSCHIEDLICH je nach Seite
@@ -486,6 +501,7 @@ def render_survey(surveydict, next_step):
             # ===== SEITE 3: Responses speichern + zusammenführen + LOGGING =====
             elif current_page == 3:
                 st.session_state.postsurvey_page3_responses = responses
+                st.session_state.postsurvey_page3_completed = True
                 
                 # Zusammenführen aller 3 Seiten
                 combined_responses = {}
@@ -537,6 +553,18 @@ def render_survey(surveydict, next_step):
 
 def render_chat():
     """Render main task interface with AI assistant chat, quote/modal buttons, and interaction logging."""
+
+    # Validate task hasn't been completed already
+    if st.session_state.get(f'task_{st.session_state.task_number}_completed', False):
+        st.warning("Diese Aufgabe wurde bereits abgeschlossen.")
+        if st.session_state.task_number < 4:
+            st.session_state.task_number += 1
+            st.rerun()
+        else:
+            st.session_state.current_step = 'poststudysurvey_page1'
+            st.rerun()
+        return
+
     if "modal_was_open" not in st.session_state:
         st.session_state.modal_was_open = False
     
@@ -748,6 +776,15 @@ def render_task_post():
                 details=f"Duration: {duration:.2f}s, Answer submitted: {post_answer}",
                 selected_answer=selected_letter
             )
+
+            if st.session_state.task_number == 1:
+                st.session_state.task_1_completed = True
+            elif st.session_state.task_number == 2:
+                st.session_state.task_2_completed = True
+            elif st.session_state.task_number == 3:
+                st.session_state.task_3_completed = True
+            elif st.session_state.task_number == 4:
+                st.session_state.task_4_completed = True
             
             # Reset for next task or proceed to post-survey
             if st.session_state.task_number < len(content.TASKS):
@@ -851,10 +888,107 @@ def render_debriefing():
 
 
 # --- Main Application Logic ---
+# --- Main Application Logic with Validation ---
 st.title("KI-Steuerassistent")
 
 step = st.session_state.current_step
 
+# COMPREHENSIVE VALIDATION SYSTEM
+def validate_and_redirect():
+    """Validates workflow progression and redirects if necessary."""
+    
+    # Define the correct progression order
+    progression = {
+        'instructions': 'consent',
+        'pre_study_survey': 'instructions',
+        'task_chat': 'pre_study_survey',
+        'task_post': 'task_chat',
+        'poststudysurvey_page1': ['task_1', 'task_2', 'task_3', 'task_4'],
+        'poststudysurvey_page2': 'poststudysurvey_page1',
+        'poststudysurvey_page3': 'poststudysurvey_page2',
+        'debriefing': 'poststudysurvey_page3'
+    }
+    
+    current = st.session_state.current_step
+    
+    # Skip validation for consent (first step)
+    if current == 'consent':
+        return False
+    
+    # Check instructions requires consent
+    if current == 'instructions':
+        if not st.session_state.get('consent_completed', False):
+            st.warning("Bitte stimmen Sie zuerst der Einverständniserklärung zu.")
+            st.session_state.current_step = 'consent'
+            return True
+    
+    # Check pre-study survey requires instructions
+    if current == 'pre_study_survey':
+        if not st.session_state.get('instructions_completed', False):
+            st.warning("Bitte schließen Sie zuerst die Anleitung ab.")
+            st.session_state.current_step = 'instructions'
+            return True
+    
+    # Check task_chat requires pre-study
+    if current == 'task_chat':
+        if not st.session_state.get('pre_study_completed', False):
+            st.warning("Bitte schließen Sie zuerst den Vorfragebogen ab.")
+            st.session_state.current_step = 'pre_study_survey'
+            return True
+        
+        # Also check previous tasks are completed
+        task_num = st.session_state.task_number
+        if task_num > 1 and not st.session_state.get(f'task_{task_num-1}_completed', False):
+            st.warning(f"Bitte schließen Sie zuerst Aufgabe {task_num-1} ab.")
+            st.session_state.task_number = task_num - 1
+            st.session_state.current_step = 'task_chat'
+            return True
+    
+    # Check task_post requires that task was started
+    if current == 'task_post':
+        if len(st.session_state.messages) == 0:
+            st.warning("Sie müssen zuerst Fragen an den Assistenten stellen.")
+            st.session_state.current_step = 'task_chat'
+            return True
+    
+    # Check post-survey page 1 requires all tasks completed
+    if current == 'poststudysurvey_page1':
+        for i in range(1, 5):
+            if not st.session_state.get(f'task_{i}_completed', False):
+                st.warning(f"Bitte schließen Sie zuerst alle Aufgaben ab. Aufgabe {i} fehlt noch.")
+                st.session_state.task_number = i
+                st.session_state.current_step = 'task_chat'
+                return True
+    
+    # Check post-survey page 2 requires page 1
+    if current == 'poststudysurvey_page2':
+        if not st.session_state.get('postsurvey_page1_completed', False):
+            st.warning("Bitte füllen Sie zuerst Seite 1 des Nachfragebogens aus.")
+            st.session_state.current_step = 'poststudysurvey_page1'
+            return True
+    
+    # Check post-survey page 3 requires pages 1 and 2
+    if current == 'poststudysurvey_page3':
+        if not st.session_state.get('postsurvey_page1_completed', False) or \
+           not st.session_state.get('postsurvey_page2_completed', False):
+            st.warning("Bitte füllen Sie alle vorherigen Seiten des Nachfragebogens aus.")
+            st.session_state.current_step = 'poststudysurvey_page1'
+            return True
+    
+    # Check debriefing requires page 3
+    if current == 'debriefing':
+        if not st.session_state.get('postsurvey_page3_completed', False):
+            st.warning("Bitte schließen Sie zuerst den Nachfragebogen ab.")
+            st.session_state.current_step = 'poststudysurvey_page1'
+            return True
+    
+    return False
+
+# Run validation before rendering
+if validate_and_redirect():
+    st.rerun()
+
+# Normal rendering after validation passes
 if step == "consent":
     render_consent()
 elif step == "instructions":
@@ -868,16 +1002,9 @@ elif step == "task_post":
 elif step == "poststudysurvey_page1":
     render_survey(create_postsurvey_page1(), next_step="poststudysurvey_page2")
 elif step == "poststudysurvey_page2":
-    if not st.session_state.get("postsurvey_page1_completed", False):
-        st.session_state.current_step = "poststudysurvey_page1"
-        st.rerun()
     render_survey(create_postsurvey_page2(), next_step="poststudysurvey_page3")
-    
 elif step == "poststudysurvey_page3":
-    if not st.session_state.get("postsurvey_page1_completed", False) or not st.session_state.get("postsurvey_page2_completed", False):
-        st.session_state.current_step = "poststudysurvey_page1"
-        st.rerun()
     render_survey(create_postsurvey_page3(), next_step="debriefing")
-
 elif step == "debriefing":
     render_debriefing()
+
