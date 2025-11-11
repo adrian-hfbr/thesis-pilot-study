@@ -160,8 +160,14 @@ COMPREHENSION_BY_CONDITION = {
 PRE_STUDY_SURVEY = {
     "title": "Fragebogen vor der Studie",
     "items": {
-        "task_completion_thoroughness": "Ich bin jemand, der beharrlich ist und an Aufgaben arbeitet, bis sie fertig sind.",
-         # ATI Short-Scale (4 items)
+        # Decision-Making Thoroughness (5 items)
+        "thoroughness_1": "Ich bevorzuge es, alle notwendigen Informationen zu sammeln, bevor ich mich zu einer Entscheidung verpflichte.",
+        "thoroughness_2": "Ich bewerte Entscheidungsalternativen gründlich, bevor ich eine endgültige Wahl treffe.",
+        "thoroughness_3": "Bei Entscheidungen nehme ich mir Zeit, um die Vor-/Nachteile oder Risiken/Vorteile einer Situation abzuwägen.",
+        "thoroughness_4": "Die Untersuchung der Fakten ist ein wichtiger Teil meines Entscheidungsprozesses.",
+        "thoroughness_5": "Ich wäge verschiedene Faktoren ab, wenn ich Entscheidungen treffe.",
+        
+        # ATI Short-Scale (4 items)
         "ati_1": "Ich beschäftige mich gern genauer mit technischen Systemen.",
         "ati_2": "Ich probiere gern die Funktionen neuer technischer Systeme aus.",
         "ati_3": "Es genügt mir, dass ein technisches System funktioniert, mir ist es egal, wie oder warum.",
@@ -235,7 +241,7 @@ POST_STUDY_SURVEY = {
     },
     "ecl_items": {  # Extraneous Cognitive Load
         "ecl_1": "Bei diesen Aufgaben ist es mühsam, die wichtigsten Informationen zu erkennen.",
-        "ecl_2": "Die Darstellung bei dieser Aufgabe ist ungünstig, um wirklich etwas zu lernen.",
+        "ecl_2": "Die Darstellung bei diesen Aufgaben ist ungünstig, um wirklich etwas zu lernen.",
         "ecl_3": "Bei dieser Aufgabe ist es schwer, die zentralen Inhalte miteinander in Verbindung zu bringen."
     },
     "gcl_items": {  # Germane Cognitive Load

@@ -96,7 +96,14 @@ def initialize_log_files():
                 "prolific_pid",         # Prolific participant ID for payment
                 "timestamp",            # ISO 8601 format session start time
                 "experimental_group",   # "Augmented" or "Minimal" condition
-                "task_completion_thoroughness",
+
+                # Decision-Making Thoroughness (5 items)
+                "thoroughness_1",
+                "thoroughness_2",
+                "thoroughness_3",
+                "thoroughness_4",
+                "thoroughness_5",
+
                 # ATI Short-Scale (4 items)
                 "ati_1",
                 "ati_2",
