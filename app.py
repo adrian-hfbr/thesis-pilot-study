@@ -896,7 +896,6 @@ step = st.session_state.current_step
 def validate_and_redirect():
     """Validates workflow progression and redirects if necessary."""
     
-    # Define the correct progression order
     progression = {
         'instructions': 'consent',
         'pre_study_survey': 'instructions',
