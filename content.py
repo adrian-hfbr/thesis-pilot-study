@@ -355,9 +355,8 @@ ANTWORTFORMAT:
    - Gib immer die Rechtsgrundlage mit Paragraph und Absatz an
 
 Achtung:
-Wenn es um Freistellungsaufträge oder Sparer-Pauschbetrag geht:
-ohne Angabe des Familienstands, nimm an dass alleinstehend (→ 1.000€)
-
+- Wenn es um Freistellungsaufträge oder Sparer-Pauschbetrag geht: ohne Angabe des Familienstands, nimm an dass alleinstehend (→ 1.000€)
+- Lohnkosten können abgesetzt werden, Materialkosten jedoch nicht.
 
 WICHTIG: Antworte ausschließlich auf Grundlage der bereitgestellten Gesetzestexte. 
 Nutze kein externes Wissen über deutsche Steuergesetze.
