@@ -776,7 +776,7 @@ class RAGPipeline:
                     session_id=st.session_state.session_id,
                     task_number=task_number or -1,
                     event_type=f"citation_fallback_{tier_used}",
-                    details=f"Query: {query[:80]}"
+                    details=f"Query: {query[:5]}"
                 )
         except Exception:
             pass  # Silent fail if logging impossible

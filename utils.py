@@ -194,7 +194,7 @@ def initialize_log_files():
                 # attention_check
                 "ac1",
                 # Manipulation check 
-                "manip_check_1"
+                "manip_check_1_opt1", "manip_check_1_opt2", "manip_check_1_opt3",
             ]).to_csv(POST_SURVEY_LOG, index=False)
         except Exception as e:
             st.error(f"Fehler beim Erstellen von {POST_SURVEY_LOG}: {e}")
@@ -468,8 +468,10 @@ def log_post_survey(session_id, survey_responses, manip_check_correct=None, tota
 
                 new_entry["ac1"] = survey_responses.get("ac1")
                 
-                new_entry["manip_check_1"] = survey_responses.get("manip_check_1")
-                
+                new_entry["manip_check_1_opt1"] = survey_responses.get("manip_check_1_opt1")
+                new_entry["manip_check_1_opt2"] = survey_responses.get("manip_check_1_opt2")
+                new_entry["manip_check_1_opt3"] = survey_responses.get("manip_check_1_opt3")
+                            
                 # Count rows before write
                 try:
                     existing_df = pd.read_csv(POST_SURVEY_LOG)

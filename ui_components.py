@@ -23,6 +23,7 @@ def format_legal_text(text):
     
     return text
 
+
 def likert_select(question: str, key: str, default: int = 4) -> int:
     """Render 7-point Likert scale with hidden labels until user interacts, showing response label post-selection."""
     # Initialize session state

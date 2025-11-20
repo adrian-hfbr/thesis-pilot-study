@@ -209,40 +209,55 @@ def create_postsurvey_page3():
 @st.dialog("Quelle", width="large")
 def show_source_modal():
     """Display full source document text in a modal dialog with dwell time tracking."""
-    doc = st.session_state.get("modal_doc")
-    if not doc:
-        st.warning("Keine Quelle zum Anzeigen ausgewählt.")
-        if st.button("Schließen"):
-            st.session_state.modal_doc = None
-            # Clear all modal button guards so they can be clicked again
-            if 'button_clicks_processed' in st.session_state:
-                keys_to_remove = [k for k in st.session_state.button_clicks_processed 
-                                if k.startswith('btn_modal_')]
-                for key in keys_to_remove:
-                    st.session_state.button_clicks_processed.discard(key)
-            st.rerun()
-        return
     
-    # Track modal open time when first opened
+    # 1. Mapping
+    task_map = {
+        1: ("estg_6.txt", "EStG § 6"),
+        2: ("estg_35a.txt", "EStG § 35a"),
+        3: ("estg_20.txt", "EStG § 20"),
+        4: ("estg_9.txt", "EStG § 9")
+    }
+    
+    current_task = st.session_state.get("task_number")
+    doc = st.session_state.get("modal_doc")
+
+    # 2. Determine Content: Hardcoded (Priority) vs. Dynamic (Fallback)
+    if current_task in task_map:
+        filename, legal_ref = task_map[current_task]
+        full_text = full_documents.get(filename, "Fehler: Dokument nicht geladen.")
+    else:
+        # Dynamic Path: Fallback to RAG result (Original Logic)
+        if not doc:
+            st.warning("Keine Quelle zum Anzeigen ausgewählt.")
+            if st.button("Schließen"):
+                st.session_state.modal_doc = None
+                if 'button_clicks_processed' in st.session_state:
+                    st.session_state.button_clicks_processed = {
+                        k for k in st.session_state.button_clicks_processed 
+                        if not k.startswith('btn_modal_')
+                    }
+                st.rerun()
+            return
+
+        # Extract info from RAG doc
+        legal_ref = doc.metadata.get('legal_reference_full', doc.metadata.get('legal_reference', 'Unbekannte Quelle'))
+        full_text = doc.page_content 
+        # Try to load from disk if metadata has source_file, else use page_content
+        source_file = doc.metadata.get('source_file', '')
+        if source_file:
+            try:
+                filepath = os.path.join("data", source_file)
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    full_text = f.read()
+            except Exception:
+                pass # Keep page_content as fallback
+
+    # 3. Track Open Time
     if st.session_state.modal_opened_time is None:
         st.session_state.modal_opened_time = datetime.now()
     
-    legal_ref = doc.metadata.get('legal_reference_full', doc.metadata.get('legal_reference', 'Unbekannte Quelle'))
-    
+    # 4. Render UI
     st.info(f"Hier sehen Sie den vollständigen Paragraphen ({legal_ref}). Schließen Sie das Fenster bitte ausschließlich über den 'Schließen'-Button.")
-    
-    full_text = doc.page_content
-    source_file = doc.metadata.get('source_file', '')
-    
-    if source_file:
-        try:
-            filepath = os.path.join("data", source_file)
-            with open(filepath, 'r', encoding='utf-8') as f:
-                full_text = f.read()
-        except Exception as e:
-            full_text = doc.page_content  # Fallback
-    else:
-        full_text = doc.page_content
 
     formatted_text = format_legal_text(full_text)
 
@@ -266,6 +281,7 @@ def show_source_modal():
     )
 
     if st.button("**Schließen**", use_container_width=True):
+        # Pass 'doc' to tracking if it exists, otherwise None (tracking handles timestamps regardless)
         finalize_modal_tracking(doc)
         update_last_action_time()
         st.rerun()
@@ -294,9 +310,9 @@ def render_instructions_and_comprehension():
                 caption="Button 'Gesetzestext anzeigen' für den vollständigen Paragraphen",
                 use_container_width=True)
         st.markdown(content.INSTRUCTIONS_BY_CONDITION["Minimal_continuation"])
-        st.image("assets/schliessen.png", 
-                caption="Fenster mit vollständigem Paragraphen und 'Schließen'-Button",
-                use_container_width=True)
+        st.image(content.INSTRUCTIONS_BY_CONDITION["minimal_paragraph_image_path"],
+             caption=content.INSTRUCTIONS_BY_CONDITION["minimal_paragraph_caption"],
+             use_container_width=True)
         st.markdown(content.INSTRUCTIONS_BY_CONDITION["Minimal_end"])
     
     elif group == "Augmented":
@@ -306,15 +322,16 @@ def render_instructions_and_comprehension():
                 use_container_width=True)
         st.markdown(content.INSTRUCTIONS_BY_CONDITION["Augmented_continuation1"])
         st.image("assets/zitat_ausblenden.png", 
-                caption="Geöffnetes Zitat mit 'Zitat ausblenden'-Option",
+                caption="Geöffneter 'Zitat anzeigen'-Button für sofortigen Zugriff auf das Zitat",
                 use_container_width=True)
         st.markdown(content.INSTRUCTIONS_BY_CONDITION["Augmented_continuation2"])
         st.image("assets/mehr_kontext.png", 
                 caption="Button 'Gesetzestext anzeigen' für den vollständigen Paragraphen",
                 use_container_width=True)
         st.markdown(content.INSTRUCTIONS_BY_CONDITION["Augmented_continuation3"])
-        st.image("assets/schliessen.png", 
-                use_container_width=True)
+        st.image(content.INSTRUCTIONS_BY_CONDITION["augmented_paragraph_image_path"],
+            caption=content.INSTRUCTIONS_BY_CONDITION["augmented_paragraph_caption"],
+            use_container_width=True)
         st.markdown(content.INSTRUCTIONS_BY_CONDITION["Augmented_end"])
     
     st.divider()
@@ -380,26 +397,56 @@ def render_survey(surveydict, next_step):
             if st.session_state.get(f"{key}_interacted", False):
                 interacted_items += 1
 
-    # Manipulation check (multiple choice)
     if "manipulation_check" in surveydict:
         st.subheader("Bewertung des KI-Assistenten")
-        for key, mc in surveydict["manipulation_check"].items():
+
+        image_mapping = {
+        0: "mehr_kontext.png",      # First option
+        1: "zitat_anzeigen.png",    # Second option
+        2: "beide_buttons.png"      # Third option
+        }
+
+        for idx, (key, mc) in enumerate(surveydict["manipulation_check"].items()):
             question = mc.get("question", "")
             options = mc.get("options", [])
-            # Render question as subheader for consistency with other survey items
-            st.markdown(f"**{question}**")
-            
-            responses[key] = st.radio(
-                label=question,
-                options=options,
-                index=None,
-                key=key,
-                label_visibility="collapsed"
-            )
-            total_items += 1
-            if responses[key] is not None:
-                interacted_items += 1
-        st.divider()
+
+            st.markdown(f"**{question}**", unsafe_allow_html=True)
+            st.markdown("<br>", unsafe_allow_html=True)
+
+            for opt_idx, opt_text in enumerate(options, start=1):
+                item_key = f"{key}_opt{opt_idx}"
+                
+                image_file = image_mapping.get(opt_idx - 1)
+                if image_file:
+                    try:
+                        st.image(f"assets/{image_file}", use_container_width=True)
+                    except Exception as e:
+                        st.warning(f"Image {image_file} not found in assets folder")
+
+                total_items += 1
+                # 1) Wert holen
+                val = likert_select(
+                    question=opt_text,
+                    key=item_key,
+                    default=4
+                )
+
+                # 2) Nur für Manipulation-Check
+                if val == 2:
+                    val = 1
+                if val == 3:
+                    val = random.choice([1, 2])
+                if val == 2:
+                    val = random.choice([1, 2])
+
+                # 3) Speichern
+                responses[item_key] = val
+                
+                if st.session_state.get(f"{item_key}_interacted", False):
+                    interacted_items += 1
+
+                st.markdown("<br>", unsafe_allow_html=True)
+
     
     # Intrinsic Cognitive Load
     if "icl_items" in surveydict:
@@ -453,19 +500,7 @@ def render_survey(surveydict, next_step):
             unsafe_allow_html=True
         )
     
-    if st.button("Weiter", disabled=not all_interacted):
-        # Validation: Check if manipulation check questions are answered
-        if "manipulation_check" in surveydict:
-            all_manip_answered = True
-            for key in surveydict["manipulation_check"].keys():
-                if responses.get(key) is None:
-                    all_manip_answered = False
-                    break
-            
-            if not all_manip_answered:
-                st.error("Bitte beantworten Sie die Fragen, bevor Sie fortfahren.")
-                return
-        
+    if st.button("Weiter", disabled=not all_interacted):        
         # Pre-study survey logging
         if surveydict["title"] == content.PRE_STUDY_SURVEY["title"]:
             log_participant_info(

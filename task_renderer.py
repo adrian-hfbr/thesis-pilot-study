@@ -56,7 +56,7 @@ def render_task_header(task):
             </style>
         """, unsafe_allow_html=True)
         
-        st.info("Nutzen Sie nun den KI-Assistenten, um die korrekte Antwort zu finden.")
+        st.info("Das Verwenden von **Fachbegriffen** verbessert die Suchergebnisse und die Antworten.")
 
 
 def render_augmented_buttons(doc, legal_ref, url, message_index, task_number, quote, show_source_modal_callback):

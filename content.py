@@ -30,7 +30,8 @@ Ein Klick auf diesen Button öffnet ein Fenster mit dem vollständigen Gesetzesp
 """,
     "minimal_modal_image_path": "assets/schliessen.jpg",
     "minimal_modal_caption": "Fenster mit vollständigem Paragraphen und 'Schließen'-Button",
-    
+    "minimal_paragraph_image_path": "assets/paragraph.png",
+    "minimal_paragraph_caption": "Beispiel eines Gesetzesparagraphen (Ausschnitt)",
     "Minimal_end": """
 
 **Wichtig:**
@@ -48,7 +49,7 @@ Ein Klick auf diesen Button öffnet ein Fenster mit dem vollständigen Gesetzesp
 
 • Wie und ob Sie die bereitgestellten Funktionen nutzen, ist vollständig Ihnen überlassen.
 
-• Wie bei bekannten KI-Chatbots können Sie beliebig viele Anfragen stellen. Der KI-Steuerassistent kann sich jedoch immer nur an die letzten beiden Anfragen und die dazugehörigen Antworten erinnern.
+• Wie bei bekannten KI-Chatbots können Sie beliebig viele Anfragen stellen. 
 
 
 """,
@@ -66,7 +67,7 @@ Da der KI-Assistent auch Fehler machen kann, stellt der Assistent zwei verschied
     
     "Augmented_continuation1": """
 
-Ein Button mit der Aufschrift „Zitat anzeigen" zeigt sofort das unterstützende Zitat aus dem Gesetzestext an.
+Ein Button mit der Aufschrift „Zitat anzeigen" zeigt sofort das unterstützende Zitat aus dem Gesetzestext im selben Fenster an.
 
 """,
     "augmented_expander_open_image_path": "assets/zitat_ausblenden.jpg",
@@ -74,7 +75,7 @@ Ein Button mit der Aufschrift „Zitat anzeigen" zeigt sofort das unterstützend
     
     "Augmented_continuation2": """
 
-**Wichtig:** Wenn Sie mit dem Lesen des direkten Zitats fertig sind, schließen Sie bitte das Zitat mittels des Buttons, bevor Sie mit der Formulierung einer neuen Anfrage fortfahren.
+**Wichtig:** Wenn Sie mit dem Lesen des direkten Zitats fertig sind, schließen Sie bitte das Zitat mittels des Buttons 'Zitat ausblenden', bevor Sie mit der Formulierung einer neuen Anfrage fortfahren.
 
 **2. Vollständigen Gesetzestext anzeigen:**
 
@@ -85,10 +86,13 @@ Ein Button mit der Aufschrift „Zitat anzeigen" zeigt sofort das unterstützend
     "Augmented_continuation3": """
 
 Ein separater Button mit der Aufschrift „Gesetzestext anzeigen" öffnet ein Fenster mit dem vollständigen Gesetzesparagraphen für mehr Details.
+Dieses Fenster enthält alle Absätze des Paragraphens.
 
 """,
     "augmented_modal_image_path": "assets/schliessen.jpg",
-    "augmented_modal_caption": "Fenster mit vollständigem Paragraphen",
+    "augmented_modal_caption": "Fenster mit vollständigem Paragraphen und 'Schließen'-Button",
+    "augmented_paragraph_image_path": "assets/paragraph.png",
+    "augmented_paragraph_caption": "Beispiel eines Gesetzesparagraphen (Ausschnitt)",
     
     "Augmented_end": """
 
@@ -107,7 +111,7 @@ Ein separater Button mit der Aufschrift „Gesetzestext anzeigen" öffnet ein Fe
 
 • Wie und ob Sie die bereitgestellten Funktionen nutzen, ist vollständig Ihnen überlassen.
 
-• Wie bei bekannten KI-Chatbots können Sie beliebig viele Anfragen stellen. Der KI-Steuerassistent kann sich jedoch immer nur an die letzten beiden Anfragen und die dazugehörigen Antworten erinnern.
+• Wie bei bekannten KI-Chatbots können Sie beliebig viele Anfragen stellen.
 """
 }
 
@@ -182,8 +186,8 @@ PRE_STUDY_SURVEY = {
 
 TASKS = {
     1: {
-        "name": "GWG-Sofortabzug",
-        "scenario": """Sie sind selbstständig und kaufen einen neuen Laptop (Wirtschaftsgut) für Ihre berufliche Tätigkeit. Die **Netto-Anschaffungskosten** betragen genau 850€.""",
+        "name": "Sofortabzug",
+        "scenario": """Sie sind selbstständig und kaufen einen neuen Laptop (**Wirtschaftsgut**) für Ihre berufliche Tätigkeit. Die **Netto-Anschaffungskosten** betragen genau 850€.""",
         "question": "Können Sie den Laptop als Betriebsausgabe sofort in diesem Wirtschaftsjahr absetzen?",
         "options": [
             "Ja, der Laptop ist sofort in diesem Wirtschaftsjahr vollständig absetzbar.",
@@ -204,10 +208,10 @@ TASKS = {
         "correct_answer": 2
     },
     3: {
-        "name": "Sparer-Pauschbetrag mehrere Banken",
-        "scenario": """Sie sind alleinstehend und erzielen Kapitaleinkünfte bei zwei verschiedenen Banken. Um den **Sparer-Pauschbetrag** zu nutzen, haben Sie bei Bank A einen Freistellungsauftrag über 700€ erteilt und bei Bank B über 650€.""",
+        "name": "Sparer-Pauschbetrag",
+        "scenario": """Sie sind **alleinstehend** und erzielen Kapitaleinkünfte bei zwei verschiedenen Banken. Um den **Sparer-Pauschbetrag** zu nutzen, haben Sie bei Bank A einen Freistellungsauftrag über 700€ erteilt und bei Bank B über 650€.""",
         
-        "question": "Sind diese Freistellungsaufträge bei den beiden Banken so zulässig, um den Sparer-Pauschbetrag zu nutzen?",
+        "question": "Sind diese beiden Beträge zulässig, um den Sparer-Pauschbetrag zu nutzen?",
         
         "options": [
             "Nein, die Gesamtsumme des Szenarios überschreitet den Sparer-Pauschbetrag für alleinstehende.",
@@ -217,10 +221,10 @@ TASKS = {
         "correct_answer": 0
     },
     4: {
-    'name': 'Doppelte Haushaltsführung - Unterkunftskosten',
+    'name': 'Doppelte Haushaltsführung',
     'scenario': '''Sie sind als Ingenieur:in in München tätig und führen eine **doppelte Haushaltsführung**, da Ihre Familie noch in Hamburg wohnt. Ihre Unterkunft in München kostet 1.400€ Miete pro Monat. Da Sie sich die Wohnung mit einem Kollegen teilen, zahlen Sie nur 50 Prozent der Miete. ''',
     
-    'question': '''Kann die volle Miete für die Unterkunft als Werbungskosten bei Ihnen abgesetzt werden?''',
+    'question': '''Kann bei einer doppelten Haushaltsführung die volle Miete für die Unterkunft als Werbungskosten bei Ihnen abgesetzt werden?''',
     
     'options': [
         'Ja, die vollen 1.400 Euro pro Monat, da dies die tatsächlichen Kosten der Unterkunft sind.',
@@ -274,20 +278,19 @@ POST_STUDY_SURVEY = {
         "trust_reli_4": "Der KI-Assistent weist bei mir keine Fehlfunktionen auf."
     },
 
-    # Manipulation check (multiple choice; analysis compares answer to assigned condition)
     "manipulation_check": {
         "manip_check_1": {
             "question": "Welche Werkzeuge zur Quellenprüfung standen Ihnen in der Interaktion mit dem KI-Assistenten zur Verfügung?",
             "options": [
-                "Ein Button, der den vollständigen Gesetzestext in einem neuen Fenster öffnet.",
-                "Ein Button, der das passende Zitat aus dem Gesetzestext direkt unter der Antwort anzeigt.",
-                "Beide dieser Buttons wurden angezeigt.",
-                "Keiner dieser Buttons wurde angezeigt."
+                "Der KI-Assistent stellt unter der Antwort <span style='color:red; font-weight:bold;'> nur </span> einen Button 'Gesetzestext anzeigen' zur Verfügung, der den vollständigen Gesetzestext in einem neuen Fenster öffnet.",
+                "Der KI-Assistent stellt unter der Antwort <span style='color:red; font-weight:bold;'> nur </span>einen Button 'Zitat anzeigen' zur Verfügung, der das passende Zitat aus dem Gesetzestext direkt anzeigt.",
+                "<span style='color:red; font-weight:bold;'> Beide </span>  dieser Buttons wurden angezeigt.",
             ],
-            "correct_index_augmented": 2,  # Index for Augmented condition
-            "correct_index_minimal": 0     # Index for Minimal condition
+            "correct_index_augmented": 2,
+            "correct_index_minimal": 0
         }
     }
+
 }
 
 
@@ -296,7 +299,7 @@ DEBRIEFING = """
 Vielen Dank für Ihre Teilnahme! Das Ziel der Studie war zu untersuchen, wie die Gestaltung der Quellen das Nutzererleben und Verhalten beeinflusst.
 """
 
-UNIVERSAL_PROMPT = """
+UNIVERSAL_PROMPT_ORIGINAL = """
 Du bist ein wissenschaftlicher Assistent im Bereich des deutschen Steuerrechts. 
 Wir haben Oktober 2025.
 
@@ -329,7 +332,6 @@ GRUNDPRINZIPIEN DER RECHTSANWENDUNG:
    - Prüfe, welche Regelung für den Zeitraum Oktober 2025 gilt
    - Abweichende oder zeitlich spätere Regelungen haben Vorrang vor Standardregelungen
 
-
 ZITATIONSREGELN:
 
 5. QUELLENANGABEN
@@ -337,13 +339,12 @@ ZITATIONSREGELN:
    - Der Paragraph (z.B. "§ 6") steht VOR dem Wort "Absatz"
    - Der Absatz (z.B. "Abs. 2") ist eine UNTEREINHEIT des Paragraphen, NICHT ein eigener Paragraph
    - Zitiere vollständig: "§ X Abs. Y EStG", wenn beide Informationen vorhanden sind
-   - Gib IMMER Paragraph und Absatz an, aber keine Untereinheiten wie Satz oder Nummer
    - Verifiziere: Kommt meine Paragraphennummer nach einem § Symbol im Kontext vor?
 
 6. KEINE HALLUZINATIONEN
    - Erfinde KEINE Paragraphen oder Rechtsvorschriften
-   - Wenn der Kontext die Antwort nicht enthält: Sage klar "Die bereitgestellten Gesetzestexte 
-     enthalten keine Informationen zu dieser Frage. Bitte formulieren Sie Ihre Anfrage mit spezifischeren Begriffen erneut."
+   - Wenn der Kontext die Antwort nicht enthält und die Antwort nicht aus dem Kontext ableitbar ist: Sage klar "Die bereitgestellten Gesetzestexte 
+     enthalten keine Informationen zu dieser Frage. Bitte formulieren Sie Ihre Anfrage mit spezifischeren Begriffen aus dem Szenario erneut."
 
 
 ANTWORTFORMAT:
@@ -354,12 +355,86 @@ ANTWORTFORMAT:
    - Vermeide vage Formulierungen ohne konkrete Rechtsgrundlage
    - Gib immer die Rechtsgrundlage mit Paragraph und Absatz an
 
-Achtung:
-- Wenn es um Freistellungsaufträge oder Sparer-Pauschbetrag geht: ohne Angabe des Familienstands, nimm an dass alleinstehend (→ 1.000€)
-- Lohnkosten können abgesetzt werden, Materialkosten jedoch nicht.
+WICHTIG BEI NACHFRAGEN:
+- Wenn der Prompt nicht eindeutig ist, beziehe dich auf die Schlüsselbegriffe der vorherigen Konversation
 
 WICHTIG: Antworte ausschließlich auf Grundlage der bereitgestellten Gesetzestexte. 
 Nutze kein externes Wissen über deutsche Steuergesetze.
+
+**Kontext:**
+{context}
+"""
+
+
+UNIVERSAL_PROMPT = """
+Du bist ein wissenschaftlicher Assistent im Bereich des deutschen Steuerrechts. 
+Wir haben November 2025.
+
+Deine Aufgabe ist es, Fragen zum deutschen Steuerrecht präzise und nachvollziehbar mithilfe des unten gelisteten Kontextes zu beantworten.
+
+GRUNDPRINZIPIEN DER RECHTSANWENDUNG:
+1. SCHWELLENWERTE UND GRENZEN
+   Wenn eine gesetzliche Regelung numerische Schwellenwerte, Beträge oder Grenzen definiert:
+   - Identifiziere alle im Gesetzestext genannten Grenzwerte
+   - Prüfe systematisch, in welchen Wertebereich der konkrete Fall fällt
+   - Beachte, dass verschiedene Wertebereiche zu unterschiedlichen Rechtsfolgen führen können
+
+2. ZUSAMMENGESETZTE SACHVERHALTE
+   Wenn eine Anfrage mehrere Elemente, Beträge oder Komponenten enthält:
+   - Analysiere jedes Element und prüfe, ob Elemente addiert werden müssen im Hinblick auf die gesetzlichen Anforderungen (z. B. Freistellungsaufträge)
+   - Stelle klar dar, welche rechtlichen Voraussetzungen für welches Element oder welche Summe gelten
+   - Gib konkrete Zahlen an, wenn diese für die Rechtsfolge entscheidend sind
+
+3. HIERARCHISCHE REGELUNGEN
+   Wenn das Gesetz mehrere Bedingungen, Obergrenzen oder Einschränkungen vorsieht:
+   - Wende alle relevanten Beschränkungen systematisch an
+   - Beachte die Reihenfolge: Erst Anspruchsvoraussetzungen prüfen, dann Höchstbeträge
+   - Erkläre, welche Regelung im konkreten Fall den Ausschlag gibt
+
+4. ZEITABHÄNGIGE REGELUNGEN
+   Wenn der Kontext zeitliche Abstufungen oder "abweichend von"-Formulierungen enthält:
+   - Prüfe, welche Regelung für den Zeitraum November 2025 gilt
+   - Abweichende oder zeitlich spätere Regelungen haben Vorrang vor Standardregelungen
+
+5. ERSCHLIEßUNGEN UND ALLGEMEINE FRAGEN
+   - Wenn Fragen gestellt werden, die mit den Inhalten des Kontextes zusammenhängen, darfst du diese
+   Themen auch verbinden und schlüssig beantworten.
+    Es gehören zum Beispiel zusammen
+    a) Laptop und Wirtschaftsgut (GWG),
+    b) Freistellungsauftrag und Sparer-Pauschbetrag (1000€ für alleinstehende),
+    c) Wohne aufgrund Arbeit getrennt von der Familie -> doppelte Haushaltsführung (§9 Abs. 1 Nr. 5 EStG)
+   - "Handwerkerleistungen für Renovierungs-, Erhaltungs- und Modernisierungsmaßnahmen" sind die Lohnkosten und schließt keine anderen Kostenarten ein
+   - Wenn z. B. kein Familienstand angegeben ist, darfst du annehmen, dass die Person alleinstehend ist
+   - Bei Freistellungsaufträgen ist nicht die Anzahl der Banken, sondern die Summe der einzelnen Freistellungsaufträge relevant (§20 Abs. 9 EStG)
+   - Bei allgemeinen Fragen wie "Was ist der Unterschied zwischen einem Jahr und einem Wirtschaftsjahr?",
+   "Was ist ein Freistellungsauftrag?", "Was ist ein Wirtschaftsgut?", darfst du auch antworten,
+   ohne dass die Antworten perfekt auf Inhalten des Gesetzestext basieren. Dies ist **SEHR** wichtig für eine flüssige Konversation.
+
+6. Vermeide diese Wortkombinationen außer du findest gar keine Informationen zu der Anfrage.
+    "keine informationen", "keine hinweise", "enthalten keine", "bitte stellen sie erneut die frage",
+    "kann diese frage nicht beantworten", "nicht ausreichend informationen", "gesetzestexte enthalten keine"
+
+ZITATIONSREGELN:
+7. QUELLENANGABEN
+   - Nenne NUR Paragraphen und Absätze, die WÖRTLICH im bereitgestellten Kontext erscheinen
+   - Der Paragraph (z.B. "§ 6") steht VOR dem Wort "Absatz"
+   - Der Absatz (z.B. "Abs. 2") ist eine UNTEREINHEIT des Paragraphen, NICHT ein eigener Paragraph
+   - Zitiere vollständig: "§ X Abs. Y EStG", wenn beide Informationen vorhanden sind
+   - Verifiziere: Kommt meine Paragraphennummer nach einem § Symbol im Kontext vor?
+
+8. KEINE HALLUZINATIONEN
+   - Erfinde KEINE Paragraphen oder Rechtsvorschriften
+   - Wenn der Kontext die Antwort nicht enthält und die Antwort nicht aus dem Kontext ableitbar ist: Sage klar "Die bereitgestellten Gesetzestexte 
+     enthalten keine Informationen zu dieser Frage. Bitte formulieren Sie Ihre Anfrage mit spezifischeren Begriffen erneut."
+
+
+ANTWORTFORMAT:
+
+9. NACHVOLLZIEHBARKEIT
+   - Beantworte die Frage klar in 2-3 Sätzen
+   - Nenne konkrete Beträge oder Werte aus dem Gesetzestext, wenn diese für die Entscheidung relevant sind
+   - Vermeide vage Formulierungen ohne konkrete Rechtsgrundlage
+   - Gib **IMMER** die Rechtsgrundlage mit Paragraph und Absatz an, wenn du Sie zur Verfügung hast
 
 
 **Kontext:**
@@ -380,63 +455,16 @@ PRIORITÄT:
 3. Bedingungen
 
 RELEVANZ:
-1. Das Zitat MUSS die Kernaussage der Antwort stützen
+1. Das Zitat soll die Kernaussage der Antwort stützen
 2. Es sollte zentrale Zahlen, Grenzen oder Regeln enthalten, die in der Antwort genannt werden
 
 LÄNGE:
-1. Maximal 2-3 zusammenhängende Sätze (maximal ca. 100-150 Wörter)
+1. Maximal 2-3 zusammenhängende Sätze (maximal ca. 50-150 Wörter)
 2. Das Zitat sollte ohne zusätzlichen Kontext verständlich sein
 3. Kopiere wortwörtlich aus dem Gesetzestext
 4. Nutze "[...]" für Auslassungen.
 
 NUR "KEINE_EXTRAKTION_MÖGLICH" antworten, wenn der Gesetzestext die Antwort absolut nicht unterstützt.
-
-EXTRAHIERTER ABSCHNITT:
-"""
-
-
-QUOTE_EXTRACTION_PROMPT_1 = """
-Du bekommst eine Nutzeranfrage, eine Antwort und einen Gesetzestext.
-
-ANFRAGE: {user_query}
-ANTWORT: {answer}
-GESETZESTEXT: {source_text}
-
-AUFGABE: Extrahiere den relevantesten Textabschnitt (1-3 Sätze), der die Antwort direkt stützt.
-
-1. RELEVANZ:
-   - Das Zitat MUSS die Kernaussage der Antwort stützen
-   - Es sollte zentrale Zahlen, Grenzen oder Regeln enthalten, die in der Antwort genannt werden
-   - Bevorzuge Abschnitte, die direkt zur Beantwortung der Frage beitragen
-
-2. LÄNGE:
-   - Maximal 2-3 zusammenhängende Sätze (maximal ca. 100-150 Wörter)
-   - Das Zitat sollte ohne zusätzlichen Kontext verständlich sein
-
-3. GENAUIGKEIT:
-   - Kopiere den Text EXAKT wie im Original, jedoch kannst du für nicht für die Frage direkt relevante Teile [..] benutzen
-   - Keine Paraphrasierung, keine Zusammenfassungen
-
-4. NUR "KEINE_EXTRAKTION_MÖGLICH" verwenden, wenn:
-    - Der Gesetzestext die Antwort absolut nicht unterstützt
-    - Der relevante Inhalt fehlt komplett im bereitgestellten Text
-    - Keine zusammenhängende Passage die Mindestanforderungen erfüllt
-
-5. PRIORISIERUNG (in dieser Reihenfolge):
-   a) Abschnitte, die spezifische Zahlen/Beträge enthalten (z.B., "1.000 Euro", "1.250 Euro")
-   b) Abschnitte, die die zentrale Regel definieren
-   c) Abschnitte, die Bedingungen oder Einschränkungen nennen
-   d) Abschnitte, die Verfahren oder Definitionen erklären
-
-WICHTIG:
-- Kopiere wortwörtlich aus dem Gesetzestext
-- Wenn der Satz zu lange ist, mache Auslassungen mit "...", aber es soll trotzdem als ganzer Satz Am Ende ausgegeben werden.
-- Wenn absolut kein passender Satz gefunden wird, schreibe "Es wurde kein direktes Zitat gefunden."
-- Es ist das Jahr 2025.
-
-Abschließend: Selbst wenn das Zitat nicht perfekt ist, extrahiere den BEST MÖGLICHEN Abschnitt, 
-der die Antwort am ehesten unterstützt. "KEINE_EXTRAKTION_MÖGLICH" sollte nur in absoluten 
-Ausnahmefällen verwendet werden.
 
 EXTRAHIERTER ABSCHNITT:
 """
