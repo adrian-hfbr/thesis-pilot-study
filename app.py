@@ -424,22 +424,14 @@ def render_survey(surveydict, next_step):
                         st.warning(f"Image {image_file} not found in assets folder")
 
                 total_items += 1
-                # 1) Wert holen
+                # Wert holen
                 val = likert_select(
                     question=opt_text,
                     key=item_key,
                     default=4
                 )
 
-                # 2) Nur für Manipulation-Check
-                if val == 2:
-                    val = 1
-                if val == 3:
-                    val = random.choice([1, 2])
-                if val == 2:
-                    val = random.choice([1, 2])
-
-                # 3) Speichern
+                # Speichern
                 responses[item_key] = val
                 
                 if st.session_state.get(f"{item_key}_interacted", False):
