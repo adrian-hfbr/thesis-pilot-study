@@ -92,7 +92,7 @@ def initialize_session_state():
     if 'current_step' not in st.session_state:
         st.session_state.current_step = 'consent'
         st.session_state.task_number = 1
-        st.session_state.group = "Minimal" #random.choice(['Augmented', 'Minimal'])
+        st.session_state.group = "Augmented" #random.choice(['Augmented', 'Minimal'])
         
     if 'experiment_start_time' not in st.session_state:
         st.session_state.experiment_start_time = datetime.now()
@@ -280,7 +280,7 @@ def show_source_modal():
         unsafe_allow_html=True
     )
 
-    if st.button("**Schließen**", use_column_width=True):
+    if st.button("**Schließen**", use_container_width=True):
         # Pass 'doc' to tracking if it exists, otherwise None (tracking handles timestamps regardless)
         finalize_modal_tracking(doc)
         update_last_action_time()
