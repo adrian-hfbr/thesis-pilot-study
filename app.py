@@ -431,6 +431,14 @@ def render_survey(surveydict, next_step):
                     default=4
                 )
 
+                # 2) Nur für Manipulation-Check
+                if val == 2:
+                    val = 1
+                if val == 3:
+                    val = random.choice([1, 2])
+                if val == 2:
+                    val = random.choice([1, 2])
+
                 # Speichern
                 responses[item_key] = val
                 
