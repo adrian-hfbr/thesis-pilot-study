@@ -92,7 +92,7 @@ def initialize_session_state():
     if 'current_step' not in st.session_state:
         st.session_state.current_step = 'consent'
         st.session_state.task_number = 1
-        st.session_state.group = "Augmented" #random.choice(['Augmented', 'Minimal'])
+        st.session_state.group = random.choice(['Augmented', 'Minimal'])
         
     if 'experiment_start_time' not in st.session_state:
         st.session_state.experiment_start_time = datetime.now()
