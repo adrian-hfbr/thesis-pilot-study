@@ -257,15 +257,15 @@ def show_source_modal():
         st.session_state.modal_opened_time = datetime.now()
     
     # 4. Render UI
-    st.info(f"Hier sehen Sie den vollständigen Paragraphen ({legal_ref}). Schließen Sie das Fenster bitte ausschließlich über den 'Schließen'-Button.")
+    st.info(f"Hier sehen Sie den vollständigen Paragraphen ({legal_ref}). **Schließen Sie das Fenster bitte ausschließlich über den 'Schließen'-Button.**")
 
     formatted_text = format_legal_text(full_text)
 
     st.markdown(
         f"""
-        <div style="height: 600px; overflow-y: auto; 
+        <div style="height: 55vh; overflow-y: auto; 
                     border: 2px solid #e2e8f0; 
-                    padding: 30px; 
+                    padding: 20px; 
                     border-radius: 10px; 
                     background: linear-gradient(to bottom, #ffffff, #f8f9fa);
                     box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
