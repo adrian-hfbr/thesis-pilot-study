@@ -149,7 +149,7 @@ COMPREHENSION_BY_CONDITION = {
             "correct_index": 0
         },
         {
-            "question": "Für welche Gesetzesbereiche kann der Assistant Auskunft geben?",
+            "question": "Für welche Gesetzesbereiche kann der Assistent Auskunft geben?",
             "options": [
                 "Für das Strafrecht.",
                 "Für das Steuerrecht.",
